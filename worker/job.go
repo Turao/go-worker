@@ -25,7 +25,7 @@ func makeJob(stdout io.Reader, stderr io.Reader, cmd *exec.Cmd) *job {
 		id:     -1,
 		stdout: stdout,
 		stderr: stderr,
-		state:  &state{mx: &sync.Mutex{}, status: SCHEDULED},
+		state:  &state{mx: &sync.RWMutex{}, status: SCHEDULED},
 
 		cmd:                 cmd,
 		onProcessStart:      make(chan bool, 1),
@@ -139,7 +139,7 @@ func (j *job) onProcessStopped() error {
 
 // job statuses
 type state struct {
-	mx     *sync.Mutex
+	mx     *sync.RWMutex
 	status status
 }
 
@@ -153,14 +153,14 @@ const (
 )
 
 func (j *job) hasStarted() bool {
-	j.state.mx.Lock()
-	defer j.state.mx.Unlock()
+	j.state.mx.RLock()
+	defer j.state.mx.RUnlock()
 	return j.state.status == RUNNING
 }
 
 func (j *job) hasFinished() bool {
-	j.state.mx.Lock()
-	defer j.state.mx.Unlock()
+	j.state.mx.RLock()
+	defer j.state.mx.RUnlock()
 	return j.state.status == COMPLETED || j.state.status == STOPPED
 }
 

@@ -73,6 +73,8 @@ func (w *worker) QueryInfo(jobId int) (*jobInfo, error) {
 	}
 
 	// here lies some race condition due to direct access
+	job.state.mx.RLock()
+	defer job.state.mx.RUnlock()
 	return &jobInfo{
 		id:     fmt.Sprint(job.id),
 		status: string(job.state.status),
