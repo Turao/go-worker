@@ -17,7 +17,7 @@ func main() {
 		log.Fatalln(err.Error())
 	}
 
-	// worker.Stop(jobId)
+	worker.Stop(jobId)
 
 	info, err := worker.QueryInfo(jobId)
 	if err != nil {

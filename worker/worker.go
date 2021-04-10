@@ -19,7 +19,7 @@ func MakeWorker() *worker {
 func (w *worker) Dispatch(cmd exec.Cmd) (int, error) {
 	var stdout io.Reader
 	var stderr io.Reader
-	job := makeJob(stdout, stderr)
+	job := makeJob(stdout, stderr, cmd)
 	_, err := w.queue.addJob(job)
 	if err != nil {
 		log.Println("unable to dispatch command", err.Error())

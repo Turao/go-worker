@@ -4,6 +4,7 @@ import (
 	"errors"
 	"io"
 	"log"
+	"os/exec"
 	"sync"
 )
 
@@ -12,14 +13,17 @@ type job struct {
 	stdout io.Reader
 	stderr io.Reader
 	state  *state
+
+	cmd exec.Cmd
 }
 
-func makeJob(stdout io.Reader, stderr io.Reader) *job {
+func makeJob(stdout io.Reader, stderr io.Reader, cmd exec.Cmd) *job {
 	return &job{
 		id:     -1,
 		stdout: stdout,
 		stderr: stderr,
 		state:  &state{mx: &sync.Mutex{}, status: SCHEDULED},
+		cmd:    cmd,
 	}
 }
 
