@@ -16,14 +16,14 @@ func MakeWorker() *worker {
 	return &worker{queue: makeQueue(defaultQueueSize)}
 }
 
-func (w *worker) Dispatch(cmd *exec.Cmd) (int, error) {
+func (w *worker) Dispatch(cmd *exec.Cmd) (string, error) {
 	var stdout io.Reader
 	var stderr io.Reader
 	job := makeJob(stdout, stderr, cmd)
-	_, err := w.queue.addJob(job)
+	err := w.queue.put(job.id, job)
 	if err != nil {
 		log.Println("unable to dispatch command", err.Error())
-		return -1, err
+		return "", err
 	}
 
 	// mock job start (this should be done by a separate goroutine)
@@ -35,8 +35,8 @@ func (w *worker) Dispatch(cmd *exec.Cmd) (int, error) {
 	return job.id, nil
 }
 
-func (w *worker) Stop(jobId int) error {
-	job, err := w.queue.getJob(jobId)
+func (w *worker) Stop(jobId string) error {
+	job, err := w.queue.get(jobId)
 	if err != nil {
 		// this could be sensitive, maybe log, maybe don't ...
 		log.Println("job does not exist", jobId, err.Error())
@@ -52,22 +52,13 @@ func (w *worker) Stop(jobId int) error {
 	return nil
 }
 
-// func (q *queue) RemoveJob(jobId int) error {
-// 	err := w.queue.removeJob(jobId)
-// 	if err != nil {
-// 		log.Println(err.Error())
-// 		return err
-// 	}
-// 	return nil
-// }
-
-type jobInfo struct {
+type JobInfo struct {
 	Id     string `json:id`
 	Status string `json:status`
 }
 
-func (w *worker) QueryInfo(jobId int) (*jobInfo, error) {
-	job, err := w.queue.getJob(jobId)
+func (w *worker) QueryInfo(jobId string) (*JobInfo, error) {
+	job, err := w.queue.get(jobId)
 	if err != nil {
 		return nil, err
 	}
@@ -75,7 +66,7 @@ func (w *worker) QueryInfo(jobId int) (*jobInfo, error) {
 	// here lies some race condition due to direct access
 	job.state.mx.RLock()
 	defer job.state.mx.RUnlock()
-	return &jobInfo{
+	return &JobInfo{
 		Id:     fmt.Sprint(job.id),
 		Status: string(job.state.status),
 	}, nil
@@ -86,8 +77,8 @@ type jobLogs struct {
 	stderr io.Reader
 }
 
-func (w *worker) QueryLogs(jobId int) (*jobLogs, error) {
-	job, err := w.queue.getJob(jobId)
+func (w *worker) QueryLogs(jobId string) (*jobLogs, error) {
+	job, err := w.queue.get(jobId)
 	if err != nil {
 		return nil, err
 	}

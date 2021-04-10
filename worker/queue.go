@@ -7,50 +7,51 @@ import (
 
 type queue struct {
 	mx   *sync.Mutex
-	jobs map[int]*job
+	jobs map[string]*job
 }
 
 func makeQueue(size int) *queue {
 	return &queue{
 		mx:   &sync.Mutex{},
-		jobs: make(map[int]*job, size),
+		jobs: make(map[string]*job, size),
 	}
 }
 
-func (q *queue) addJob(job *job) (int, error) {
+func (q *queue) put(key string, value *job) error {
 	q.mx.Lock()
 	defer q.mx.Unlock()
 
 	// prevent adding the same job twice
-	if job.id != -1 {
-		return -1, errors.New("job already has an id assigned, thus was already added")
+	if _, found := q.jobs[key]; found {
+		return ErrIdAlreadyTaken
 	}
 
-	id := len(q.jobs)
-	job.id = id
-
-	q.jobs[id] = job // could there be a job in this position already (likely not)
-	return id, nil
+	// could there be a job in this position already (likely not)
+	q.jobs[key] = value
+	return nil
 }
 
-func (q *queue) getJob(id int) (*job, error) {
+func (q *queue) get(id string) (*job, error) {
 	q.mx.Lock()
 	defer q.mx.Unlock()
 	job, found := q.jobs[id]
 	if !found {
-		return nil, errors.New("job does not exist")
+		return nil, ErrNotExists
 	}
 	return job, nil
 }
 
-func (q *queue) removeJob(id int) error {
+func (q *queue) remove(id string) error {
 	q.mx.Lock()
 	defer q.mx.Unlock()
-	_, found := q.jobs[id]
-	if !found {
-		return errors.New("job does not exist")
+
+	if _, found := q.jobs[id]; !found {
+		return ErrNotExists
 	}
 
-	delete(q.jobs, id)
+	delete(q.jobs, id) // I don't like no-ops
 	return nil
 }
+
+var ErrNotExists error = errors.New("job does not exist")
+var ErrIdAlreadyTaken error = errors.New("id has already been taken")

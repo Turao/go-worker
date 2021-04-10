@@ -6,10 +6,12 @@ import (
 	"log"
 	"os/exec"
 	"sync"
+
+	"github.com/google/uuid"
 )
 
 type job struct {
-	id     int
+	id     string
 	stdout io.Reader
 	stderr io.Reader
 	state  *state
@@ -22,7 +24,7 @@ type job struct {
 
 func makeJob(stdout io.Reader, stderr io.Reader, cmd *exec.Cmd) *job {
 	return &job{
-		id:     -1,
+		id:     uuid.New().String(),
 		stdout: stdout,
 		stderr: stderr,
 		state:  &state{mx: &sync.RWMutex{}, status: SCHEDULED},
