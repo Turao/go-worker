@@ -169,7 +169,6 @@ var ErrAlreadyFinished error = errors.New("job has already finished (either comp
 var ErrNotStarted error = errors.New("job has not started yet")
 var ErrNotFinished error = errors.New("job has not finished yet")
 
-// change state status
 var ErrNotScheduled error = errors.New("job is not scheduled")
 var ErrNotRunning error = errors.New("job is not running")
 

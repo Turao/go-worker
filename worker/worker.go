@@ -62,8 +62,8 @@ func (w *worker) Stop(jobId int) error {
 // }
 
 type jobInfo struct {
-	id     string
-	status string
+	Id     string `json:id`
+	Status string `json:status`
 }
 
 func (w *worker) QueryInfo(jobId int) (*jobInfo, error) {
@@ -76,8 +76,8 @@ func (w *worker) QueryInfo(jobId int) (*jobInfo, error) {
 	job.state.mx.RLock()
 	defer job.state.mx.RUnlock()
 	return &jobInfo{
-		id:     fmt.Sprint(job.id),
-		status: string(job.state.status),
+		Id:     fmt.Sprint(job.id),
+		Status: string(job.state.status),
 	}, nil
 }
 

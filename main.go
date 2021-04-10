@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"log"
 	"os/exec"
 	"time"
@@ -18,15 +19,17 @@ func main() {
 		log.Fatalln(err.Error())
 	}
 
+	time.Sleep(1 * time.Second)
+	worker.Stop(jobId)
+	time.Sleep(10 * time.Second)
+
 	info, err := worker.QueryInfo(jobId)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
 
-	time.Sleep(1 * time.Second)
-	worker.Stop(jobId)
-
-	log.Println(info)
+	d, _ := json.MarshalIndent(info, "", "  ")
+	log.Println(string(d))
 
 	time.Sleep(10 * time.Second)
 }
