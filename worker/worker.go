@@ -16,7 +16,7 @@ func MakeWorker() *worker {
 	return &worker{queue: makeQueue(defaultQueueSize)}
 }
 
-func (w *worker) Dispatch(cmd exec.Cmd) (int, error) {
+func (w *worker) Dispatch(cmd *exec.Cmd) (int, error) {
 	var stdout io.Reader
 	var stderr io.Reader
 	job := makeJob(stdout, stderr, cmd)
@@ -49,14 +49,17 @@ func (w *worker) Stop(jobId int) error {
 		return err
 	}
 
-	err = w.queue.removeJob(jobId)
-	if err != nil {
-		log.Println(err.Error())
-		return err
-	}
-
 	return nil
 }
+
+// func (q *queue) RemoveJob(jobId int) error {
+// 	err := w.queue.removeJob(jobId)
+// 	if err != nil {
+// 		log.Println(err.Error())
+// 		return err
+// 	}
+// 	return nil
+// }
 
 type jobInfo struct {
 	id     string
