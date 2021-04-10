@@ -72,6 +72,7 @@ func (w *worker) QueryInfo(jobId int) (*jobInfo, error) {
 		return nil, err
 	}
 
+	// here lies some race condition due to direct access
 	return &jobInfo{
 		id:     fmt.Sprint(job.id),
 		status: string(job.state.status),

@@ -153,10 +153,14 @@ const (
 )
 
 func (j *job) hasStarted() bool {
+	j.state.mx.Lock()
+	defer j.state.mx.Unlock()
 	return j.state.status == RUNNING
 }
 
 func (j *job) hasFinished() bool {
+	j.state.mx.Lock()
+	defer j.state.mx.Unlock()
 	return j.state.status == COMPLETED || j.state.status == STOPPED
 }
 
