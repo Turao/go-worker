@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	worker := worker.MakeWorker()
+	worker := worker.NewWorker()
 
 	jobId, err := worker.Dispatch("ls", "-lah")
 	if err != nil {

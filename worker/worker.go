@@ -9,7 +9,7 @@ type worker struct {
 	queue *queue
 }
 
-func MakeWorker() *worker {
+func NewWorker() *worker {
 	defaultQueueSize := 100
 	return &worker{queue: NewQueue(defaultQueueSize)}
 }
