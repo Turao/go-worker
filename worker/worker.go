@@ -51,8 +51,9 @@ func (w *worker) Stop(jobId string) error {
 }
 
 type JobInfo struct {
-	Id     string `json:id`
-	Status string `json:status`
+	Id       string `json:"id"`
+	Status   string `json:"status"`
+	ExitCode *int   `json:"exitCode,omitempty"`
 }
 
 func (w *worker) QueryInfo(jobId string) (*JobInfo, error) {
@@ -62,8 +63,9 @@ func (w *worker) QueryInfo(jobId string) (*JobInfo, error) {
 	}
 
 	return &JobInfo{
-		Id:     fmt.Sprint(job.id),
-		Status: string(job.state.Status()),
+		Id:       fmt.Sprint(job.id),
+		Status:   string(job.state.Status()),
+		ExitCode: job.state.ExitCode(),
 	}, nil
 }
 

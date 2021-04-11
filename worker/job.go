@@ -127,7 +127,8 @@ func (j *job) onProcessStarted() error {
 func (j *job) onProcessCompleted() error {
 	log.Println("process completed")
 
-	err := j.state.completed()
+	exitCode := j.cmd.ProcessState.ExitCode()
+	err := j.state.completed(&exitCode)
 	if err != nil {
 		return err
 	}
@@ -137,7 +138,8 @@ func (j *job) onProcessCompleted() error {
 func (j *job) onProcessStopped() error {
 	log.Println("process stopped")
 
-	err := j.state.stopped()
+	exitCode := j.cmd.ProcessState.ExitCode()
+	err := j.state.stopped(&exitCode)
 	if err != nil {
 		return err
 	}
@@ -146,14 +148,21 @@ func (j *job) onProcessStopped() error {
 
 // state encapsulates a status enum and provides thread-safe status change operations
 type state struct {
-	mx     *sync.RWMutex
-	status status
+	mx       *sync.RWMutex
+	status   status
+	exitCode *int
 }
 
 func (s *state) Status() status {
 	s.mx.RLock()
 	defer s.mx.RUnlock()
 	return s.status
+}
+
+func (s *state) ExitCode() *int {
+	s.mx.RLock()
+	defer s.mx.RUnlock()
+	return s.exitCode
 }
 
 type status string
@@ -184,6 +193,7 @@ var ErrNotFinished error = errors.New("job has not finished yet")
 
 var ErrNotScheduled error = errors.New("job is not scheduled")
 var ErrNotRunning error = errors.New("job is not running")
+var ErrNoExitCode error = errors.New("job terminated without exit code")
 
 func (s *state) running() error {
 	s.mx.Lock()
@@ -196,25 +206,35 @@ func (s *state) running() error {
 	return nil
 }
 
-func (s *state) completed() error {
+func (s *state) completed(exitCode *int) error {
 	s.mx.Lock()
 	defer s.mx.Unlock()
 	if s.status != RUNNING {
 		return ErrNotRunning
+	}
+
+	if exitCode == nil {
+		return ErrNoExitCode
 	}
 
 	s.status = COMPLETED
+	s.exitCode = exitCode
 	return nil
 }
 
-func (s *state) stopped() error {
+func (s *state) stopped(exitCode *int) error {
 	s.mx.Lock()
 	defer s.mx.Unlock()
 	if s.status != RUNNING {
 		return ErrNotRunning
 	}
 
+	if exitCode == nil {
+		return ErrNoExitCode
+	}
+
 	s.status = STOPPED
+	s.exitCode = exitCode
 	return nil
 }
 
