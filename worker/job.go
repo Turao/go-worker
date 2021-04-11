@@ -13,8 +13,8 @@ import (
 type job struct {
 	id string
 
-	logs  *logs
 	state *state
+	logs  *logs
 
 	cmd                 *exec.Cmd
 	onProcessStart      chan bool
@@ -34,8 +34,8 @@ func NewJob(name string, args ...string) *job {
 
 	return &job{
 		id:    uuid.New().String(),
-		logs:  &logs,
 		state: &state{mx: &sync.RWMutex{}, status: SCHEDULED},
+		logs:  &logs,
 
 		cmd:                 command,
 		onProcessStart:      make(chan bool, 1),
