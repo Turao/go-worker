@@ -150,6 +150,12 @@ type state struct {
 	status status
 }
 
+func (s *state) getStatus() status {
+	s.mx.RLock()
+	defer s.mx.RUnlock()
+	return s.status
+}
+
 type status string
 
 const (

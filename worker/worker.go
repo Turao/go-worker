@@ -62,12 +62,9 @@ func (w *worker) QueryInfo(jobId string) (*JobInfo, error) {
 		return nil, err
 	}
 
-	// here lies some race condition due to direct access
-	job.state.mx.RLock()
-	defer job.state.mx.RUnlock()
 	return &JobInfo{
 		Id:     fmt.Sprint(job.id),
-		Status: string(job.state.status),
+		Status: string(job.state.getStatus()),
 	}, nil
 }
 
@@ -82,11 +79,10 @@ func (w *worker) QueryLogs(jobId string) (*JobLogs, error) {
 		return nil, err
 	}
 
-	log.Println(job.logs)
 	// pull out the logs from the job, but do not expose their pointers
 	logs := &JobLogs{
 		Output: job.logs.getOutput(),
-		Errors: "job.logs.getErrors()",
+		Errors: job.logs.getErrors(),
 	}
 
 	return logs, nil
