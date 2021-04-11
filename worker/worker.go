@@ -11,14 +11,14 @@ type worker struct {
 
 func MakeWorker() *worker {
 	defaultQueueSize := 100
-	return &worker{queue: makeQueue(defaultQueueSize)}
+	return &worker{queue: NewQueue(defaultQueueSize)}
 }
 
 func (w *worker) Dispatch(name string, args ...string) (string, error) {
 	log.Println("dispatching new job for", name)
 
 	job := NewJob(name, args...)
-	err := w.queue.put(job.id, job)
+	err := w.queue.Put(job.id, job)
 	if err != nil {
 		log.Println("unable to store command", err.Error())
 		return "", err
@@ -35,7 +35,7 @@ func (w *worker) Dispatch(name string, args ...string) (string, error) {
 }
 
 func (w *worker) Stop(jobId string) error {
-	job, err := w.queue.get(jobId)
+	job, err := w.queue.Get(jobId)
 	if err != nil {
 		// this could be sensitive, maybe log, maybe don't ...
 		log.Println("unable to retrieve job", jobId, err.Error())
@@ -57,7 +57,7 @@ type JobInfo struct {
 }
 
 func (w *worker) QueryInfo(jobId string) (*JobInfo, error) {
-	job, err := w.queue.get(jobId)
+	job, err := w.queue.Get(jobId)
 	if err != nil {
 		return nil, err
 	}
@@ -74,7 +74,7 @@ type JobLogs struct {
 }
 
 func (w *worker) QueryLogs(jobId string) (*JobLogs, error) {
-	job, err := w.queue.get(jobId)
+	job, err := w.queue.Get(jobId)
 	if err != nil {
 		return nil, err
 	}

@@ -10,14 +10,14 @@ type queue struct {
 	jobs map[string]*job
 }
 
-func makeQueue(size int) *queue {
+func NewQueue(size int) *queue {
 	return &queue{
 		mx:   &sync.RWMutex{},
 		jobs: make(map[string]*job, size),
 	}
 }
 
-func (q *queue) put(key string, value *job) error {
+func (q *queue) Put(key string, value *job) error {
 	q.mx.Lock()
 	defer q.mx.Unlock()
 
@@ -31,7 +31,7 @@ func (q *queue) put(key string, value *job) error {
 	return nil
 }
 
-func (q *queue) get(id string) (*job, error) {
+func (q *queue) Get(id string) (*job, error) {
 	q.mx.RLock()
 	defer q.mx.RUnlock()
 	job, found := q.jobs[id]
@@ -41,7 +41,7 @@ func (q *queue) get(id string) (*job, error) {
 	return job, nil
 }
 
-func (q *queue) remove(id string) error {
+func (q *queue) Remove(id string) error {
 	q.mx.Lock()
 	defer q.mx.Unlock()
 
