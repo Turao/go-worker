@@ -17,7 +17,7 @@ func MakeWorker() *worker {
 func (w *worker) Dispatch(name string, args ...string) (string, error) {
 	log.Println("dispatching new job for", name)
 
-	job := makeJob(name, args...)
+	job := NewJob(name, args...)
 	err := w.queue.put(job.id, job)
 	if err != nil {
 		log.Println("unable to store command", err.Error())
@@ -25,7 +25,7 @@ func (w *worker) Dispatch(name string, args ...string) (string, error) {
 	}
 
 	// mock job start (this should be done by a separate goroutine)
-	err = job.start()
+	err = job.Start()
 	if err != nil {
 		log.Println("unable to dispatch command", err.Error())
 		return "", err
@@ -42,7 +42,7 @@ func (w *worker) Stop(jobId string) error {
 		return err
 	}
 
-	err = job.stop()
+	err = job.Stop()
 	if err != nil {
 		log.Println("unable to stop job", jobId, err.Error())
 		return err
@@ -64,7 +64,7 @@ func (w *worker) QueryInfo(jobId string) (*JobInfo, error) {
 
 	return &JobInfo{
 		Id:     fmt.Sprint(job.id),
-		Status: string(job.state.getStatus()),
+		Status: string(job.state.Status()),
 	}, nil
 }
 
@@ -81,8 +81,8 @@ func (w *worker) QueryLogs(jobId string) (*JobLogs, error) {
 
 	// pull out the logs from the job, but do not expose their pointers
 	logs := &JobLogs{
-		Output: job.logs.getOutput(),
-		Errors: job.logs.getErrors(),
+		Output: job.logs.Output(),
+		Errors: job.logs.Errors(),
 	}
 
 	return logs, nil

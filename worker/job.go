@@ -22,7 +22,7 @@ type job struct {
 	onProcessStop       chan bool
 }
 
-func makeJob(name string, args ...string) *job {
+func NewJob(name string, args ...string) *job {
 	command := exec.Command(name, args...)
 
 	logs := logs{
@@ -60,7 +60,7 @@ func (j *job) watch() error {
 	}
 }
 
-func (j *job) start() error {
+func (j *job) Start() error {
 	if j.hasStarted() {
 		return ErrAlreadyStarted
 	}
@@ -82,7 +82,7 @@ func (j *job) start() error {
 	return nil
 }
 
-func (j *job) stop() error {
+func (j *job) Stop() error {
 	if !j.hasStarted() {
 		return ErrNotStarted
 	}
@@ -150,7 +150,7 @@ type state struct {
 	status status
 }
 
-func (s *state) getStatus() status {
+func (s *state) Status() status {
 	s.mx.RLock()
 	defer s.mx.RUnlock()
 	return s.status
@@ -223,10 +223,10 @@ type logs struct {
 	stderr threadSafeBuffer
 }
 
-func (l *logs) getOutput() string {
+func (l *logs) Output() string {
 	return l.stdout.String()
 }
 
-func (l *logs) getErrors() string {
+func (l *logs) Errors() string {
 	return l.stderr.String()
 }
