@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"log"
-	"os/exec"
 	"time"
 
 	"github.com/turao/kami-go/worker"
@@ -12,9 +11,7 @@ import (
 func main() {
 	worker := worker.MakeWorker()
 
-	command := exec.Command("sleep", "2")
-
-	jobId, err := worker.Dispatch(command)
+	jobId, err := worker.Dispatch("ls")
 	if err != nil {
 		log.Fatalln(err.Error())
 	}

@@ -22,12 +22,10 @@ type job struct {
 	onProcessStop       chan bool
 }
 
-func makeJob(stdout io.Reader, stderr io.Reader, cmd *exec.Cmd) *job {
+func makeJob(cmd *exec.Cmd) *job {
 	return &job{
-		id:     uuid.New().String(),
-		stdout: stdout,
-		stderr: stderr,
-		state:  &state{mx: &sync.RWMutex{}, status: SCHEDULED},
+		id:    uuid.New().String(),
+		state: &state{mx: &sync.RWMutex{}, status: SCHEDULED},
 
 		cmd:                 cmd,
 		onProcessStart:      make(chan bool, 1),
@@ -109,7 +107,6 @@ func (j *job) onProcessStarted() error {
 
 	err := j.state.running()
 	if err != nil {
-		log.Println(err.Error())
 		return err
 	}
 
@@ -122,7 +119,6 @@ func (j *job) onProcessCompleted() error {
 
 	err := j.state.completed()
 	if err != nil {
-		log.Println(err.Error())
 		return err
 	}
 	return nil
@@ -133,7 +129,6 @@ func (j *job) onProcessStopped() error {
 
 	err := j.state.stopped()
 	if err != nil {
-		log.Println(err.Error())
 		return err
 	}
 	return nil
@@ -180,6 +175,7 @@ func (s *state) running() error {
 	if s.status != SCHEDULED {
 		return ErrNotScheduled
 	}
+
 	s.status = RUNNING
 	return nil
 }
@@ -190,6 +186,7 @@ func (s *state) completed() error {
 	if s.status != RUNNING {
 		return ErrNotRunning
 	}
+
 	s.status = COMPLETED
 	return nil
 }
@@ -200,6 +197,7 @@ func (s *state) stopped() error {
 	if s.status != RUNNING {
 		return ErrNotRunning
 	}
+
 	s.status = STOPPED
 	return nil
 }

@@ -16,10 +16,16 @@ func MakeWorker() *worker {
 	return &worker{queue: makeQueue(defaultQueueSize)}
 }
 
-func (w *worker) Dispatch(cmd *exec.Cmd) (string, error) {
-	var stdout io.Reader
-	var stderr io.Reader
-	job := makeJob(stdout, stderr, cmd)
+// makeCommand simply wraps around the exec.cmd struct in case we need to sanitize commands
+func (w *worker) makeCommand(name string, args ...string) *exec.Cmd {
+	return exec.Command(name, args...)
+
+}
+
+func (w *worker) Dispatch(name string, args ...string) (string, error) {
+	command := w.makeCommand(name, args...)
+
+	job := makeJob(command)
 	err := w.queue.put(job.id, job)
 	if err != nil {
 		log.Println("unable to dispatch command", err.Error())
@@ -82,6 +88,7 @@ func (w *worker) QueryLogs(jobId string) (*jobLogs, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return &jobLogs{
 		stdout: job.stdout,
 		stderr: job.stderr,
