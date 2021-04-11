@@ -146,7 +146,7 @@ func (j *job) onProcessStopped() error {
 	return nil
 }
 
-// state encapsulates a status enum and provides thread-safe status change operations
+// state provides thread-safe operations for reading/updating the job current state
 type state struct {
 	mx       *sync.RWMutex
 	status   status
@@ -238,6 +238,7 @@ func (s *state) stopped(exitCode *int) error {
 	return nil
 }
 
+// logs provides thread-safe operations for reading job logs
 type logs struct {
 	stdout *threadSafeBuffer
 	stderr *threadSafeBuffer
