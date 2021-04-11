@@ -15,7 +15,7 @@ func NewWorker() *worker {
 }
 
 func (w *worker) Dispatch(name string, args ...string) (string, error) {
-	log.Println("dispatching new job for", name)
+	log.Println("dispatching new job for command:", name, args)
 
 	job := NewJob(name, args...)
 	err := w.queue.Put(job.id, job)
@@ -24,7 +24,6 @@ func (w *worker) Dispatch(name string, args ...string) (string, error) {
 		return "", err
 	}
 
-	// mock job start (this should be done by a separate goroutine)
 	err = job.Start()
 	if err != nil {
 		log.Println("unable to dispatch command", err.Error())
