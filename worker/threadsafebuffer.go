@@ -5,6 +5,7 @@ import (
 	"sync"
 )
 
+// threadSafeBuffer decorates a buffer to provide thread-safe read/write operations
 type threadSafeBuffer struct {
 	mx  *sync.RWMutex
 	buf *bytes.Buffer
