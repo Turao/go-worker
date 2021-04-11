@@ -24,13 +24,17 @@ type job struct {
 
 func makeJob(name string, args ...string) *job {
 	command := exec.Command(name, args...)
-	var stdout, stderr bytes.Buffer
-	command.Stdout = &stdout
-	command.Stderr = &stderr
+
+	logs := logs{
+		stdout: &threadSafeBuffer{mx: &sync.RWMutex{}, buf: &bytes.Buffer{}},
+		stderr: &threadSafeBuffer{mx: &sync.RWMutex{}, buf: &bytes.Buffer{}},
+	}
+	command.Stdout = logs.stdout
+	command.Stderr = logs.stderr
 
 	return &job{
 		id:    uuid.New().String(),
-		logs:  &logs{mx: &sync.RWMutex{}, stdout: &stdout, stderr: &stderr},
+		logs:  &logs,
 		state: &state{mx: &sync.RWMutex{}, status: SCHEDULED},
 
 		cmd:                 command,
@@ -209,19 +213,37 @@ func (s *state) stopped() error {
 }
 
 type logs struct {
-	mx     *sync.RWMutex
-	stdout *bytes.Buffer
-	stderr *bytes.Buffer
+	stdout *threadSafeBuffer
+	stderr *threadSafeBuffer
 }
 
 func (l *logs) getOutput() string {
-	l.mx.RLock()
-	defer l.mx.RUnlock()
 	return l.stdout.String()
 }
 
 func (l *logs) getErrors() string {
-	l.mx.RLock()
-	defer l.mx.RUnlock()
 	return l.stderr.String()
+}
+
+type threadSafeBuffer struct {
+	mx  *sync.RWMutex
+	buf *bytes.Buffer
+}
+
+func (b *threadSafeBuffer) Read(p []byte) (n int, err error) {
+	b.mx.RLock()
+	defer b.mx.RUnlock()
+	return b.buf.Read(p)
+}
+
+func (b *threadSafeBuffer) Write(p []byte) (n int, err error) {
+	b.mx.Lock()
+	defer b.mx.Unlock()
+	return b.buf.Write(p)
+}
+
+func (b *threadSafeBuffer) String() string {
+	b.mx.RLock()
+	defer b.mx.RUnlock()
+	return b.buf.String()
 }
