@@ -22,12 +22,14 @@ type job struct {
 	onProcessStop       chan bool
 }
 
-func makeJob(cmd *exec.Cmd) *job {
+func makeJob(name string, args ...string) *job {
+	command := exec.Command(name, args...)
+
 	return &job{
 		id:    uuid.New().String(),
 		state: &state{mx: &sync.RWMutex{}, status: SCHEDULED},
 
-		cmd:                 cmd,
+		cmd:                 command,
 		onProcessStart:      make(chan bool, 1),
 		onProcessCompletion: make(chan bool, 1),
 		onProcessStop:       make(chan bool, 1),

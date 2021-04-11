@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"os/exec"
 )
 
 type worker struct {
@@ -16,26 +15,21 @@ func MakeWorker() *worker {
 	return &worker{queue: makeQueue(defaultQueueSize)}
 }
 
-// makeCommand simply wraps around the exec.cmd struct in case we need to sanitize commands
-func (w *worker) makeCommand(name string, args ...string) *exec.Cmd {
-	return exec.Command(name, args...)
-
-}
-
 func (w *worker) Dispatch(name string, args ...string) (string, error) {
-	command := w.makeCommand(name, args...)
+	log.Println("dispatching new job for", name)
 
-	job := makeJob(command)
+	job := makeJob(name, args...)
 	err := w.queue.put(job.id, job)
 	if err != nil {
-		log.Println("unable to dispatch command", err.Error())
+		log.Println("unable to store command", err.Error())
 		return "", err
 	}
 
 	// mock job start (this should be done by a separate goroutine)
 	err = job.start()
 	if err != nil {
-		log.Println("job started!")
+		log.Println("unable to dispatch command", err.Error())
+		return "", err
 	}
 
 	return job.id, nil
@@ -45,7 +39,7 @@ func (w *worker) Stop(jobId string) error {
 	job, err := w.queue.get(jobId)
 	if err != nil {
 		// this could be sensitive, maybe log, maybe don't ...
-		log.Println("job does not exist", jobId, err.Error())
+		log.Println("unable to retrieve job", jobId, err.Error())
 		return err
 	}
 

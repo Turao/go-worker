@@ -6,13 +6,13 @@ import (
 )
 
 type queue struct {
-	mx   *sync.Mutex
+	mx   *sync.RWMutex
 	jobs map[string]*job
 }
 
 func makeQueue(size int) *queue {
 	return &queue{
-		mx:   &sync.Mutex{},
+		mx:   &sync.RWMutex{},
 		jobs: make(map[string]*job, size),
 	}
 }
@@ -32,8 +32,8 @@ func (q *queue) put(key string, value *job) error {
 }
 
 func (q *queue) get(id string) (*job, error) {
-	q.mx.Lock()
-	defer q.mx.Unlock()
+	q.mx.RLock()
+	defer q.mx.RUnlock()
 	job, found := q.jobs[id]
 	if !found {
 		return nil, ErrNotExists
