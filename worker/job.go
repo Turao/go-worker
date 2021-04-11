@@ -26,11 +26,11 @@ func NewJob(name string, args ...string) *job {
 	command := exec.Command(name, args...)
 
 	logs := logs{
-		stdout: threadSafeBuffer{mx: &sync.RWMutex{}, buf: &bytes.Buffer{}},
-		stderr: threadSafeBuffer{mx: &sync.RWMutex{}, buf: &bytes.Buffer{}},
+		stdout: &threadSafeBuffer{mx: sync.RWMutex{}, buf: bytes.Buffer{}},
+		stderr: &threadSafeBuffer{mx: sync.RWMutex{}, buf: bytes.Buffer{}},
 	}
-	command.Stdout = &logs.stdout
-	command.Stderr = &logs.stderr
+	command.Stdout = logs.stdout
+	command.Stderr = logs.stderr
 
 	return &job{
 		id:    uuid.New().String(),
@@ -219,8 +219,8 @@ func (s *state) stopped() error {
 }
 
 type logs struct {
-	stdout threadSafeBuffer
-	stderr threadSafeBuffer
+	stdout *threadSafeBuffer
+	stderr *threadSafeBuffer
 }
 
 func (l *logs) Output() string {

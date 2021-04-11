@@ -7,8 +7,8 @@ import (
 
 // threadSafeBuffer decorates a buffer to provide thread-safe read/write operations
 type threadSafeBuffer struct {
-	mx  *sync.RWMutex
-	buf *bytes.Buffer
+	mx  sync.RWMutex
+	buf bytes.Buffer
 }
 
 func (b *threadSafeBuffer) Read(p []byte) (n int, err error) {
