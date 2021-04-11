@@ -1,8 +1,8 @@
 package worker
 
 import (
+	"bytes"
 	"errors"
-	"io"
 	"log"
 	"os/exec"
 	"sync"
@@ -11,10 +11,10 @@ import (
 )
 
 type job struct {
-	id     string
-	stdout io.Reader
-	stderr io.Reader
-	state  *state
+	id string
+
+	logs  *logs
+	state *state
 
 	cmd                 *exec.Cmd
 	onProcessStart      chan bool
@@ -24,9 +24,13 @@ type job struct {
 
 func makeJob(name string, args ...string) *job {
 	command := exec.Command(name, args...)
+	var stdout, stderr bytes.Buffer
+	command.Stdout = &stdout
+	command.Stderr = &stderr
 
 	return &job{
 		id:    uuid.New().String(),
+		logs:  &logs{mx: &sync.RWMutex{}, stdout: &stdout, stderr: &stderr},
 		state: &state{mx: &sync.RWMutex{}, status: SCHEDULED},
 
 		cmd:                 command,
@@ -202,4 +206,22 @@ func (s *state) stopped() error {
 
 	s.status = STOPPED
 	return nil
+}
+
+type logs struct {
+	mx     *sync.RWMutex
+	stdout *bytes.Buffer
+	stderr *bytes.Buffer
+}
+
+func (l *logs) getOutput() string {
+	l.mx.RLock()
+	defer l.mx.RUnlock()
+	return l.stdout.String()
+}
+
+func (l *logs) getErrors() string {
+	l.mx.RLock()
+	defer l.mx.RUnlock()
+	return l.stderr.String()
 }

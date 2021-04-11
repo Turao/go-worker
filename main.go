@@ -11,14 +11,14 @@ import (
 func main() {
 	worker := worker.MakeWorker()
 
-	jobId, err := worker.Dispatch("ls")
+	jobId, err := worker.Dispatch("ls", "-lah")
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
 
-	time.Sleep(1 * time.Second)
-	worker.Stop(jobId)
-	time.Sleep(10 * time.Second)
+	// time.Sleep(1 * time.Second)
+	// worker.Stop(jobId)
+	time.Sleep(3 * time.Second)
 
 	info, err := worker.QueryInfo(jobId)
 	if err != nil {
@@ -28,5 +28,13 @@ func main() {
 	d, _ := json.MarshalIndent(info, "", "  ")
 	log.Println(string(d))
 
-	time.Sleep(10 * time.Second)
+	time.Sleep(5 * time.Second)
+
+	logs, err := worker.QueryLogs(jobId)
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
+	log.Println("output:\n", logs.Output)
+	log.Println("errors:\n", logs.Errors)
 }

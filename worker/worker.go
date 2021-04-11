@@ -2,7 +2,6 @@ package worker
 
 import (
 	"fmt"
-	"io"
 	"log"
 )
 
@@ -72,19 +71,23 @@ func (w *worker) QueryInfo(jobId string) (*JobInfo, error) {
 	}, nil
 }
 
-type jobLogs struct {
-	stdout io.Reader
-	stderr io.Reader
+type JobLogs struct {
+	Output string
+	Errors string
 }
 
-func (w *worker) QueryLogs(jobId string) (*jobLogs, error) {
+func (w *worker) QueryLogs(jobId string) (*JobLogs, error) {
 	job, err := w.queue.get(jobId)
 	if err != nil {
 		return nil, err
 	}
 
-	return &jobLogs{
-		stdout: job.stdout,
-		stderr: job.stderr,
-	}, nil
+	log.Println(job.logs)
+	// pull out the logs from the job, but do not expose their pointers
+	logs := &JobLogs{
+		Output: job.logs.getOutput(),
+		Errors: "job.logs.getErrors()",
+	}
+
+	return logs, nil
 }
