@@ -177,7 +177,7 @@ const (
 func (j *job) hasStarted() bool {
 	j.state.mx.RLock()
 	defer j.state.mx.RUnlock()
-	return j.state.status == RUNNING
+	return j.state.status != SCHEDULED
 }
 
 func (j *job) hasFinished() bool {
