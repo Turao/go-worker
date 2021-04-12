@@ -77,8 +77,6 @@ func (j *job) Start() error {
 	go j.watch()
 
 	j.onProcessStart <- true
-	close(j.onProcessStart)
-
 	return nil
 }
 
@@ -98,8 +96,6 @@ func (j *job) Stop() error {
 	}
 
 	j.onProcessStop <- true
-	close(j.onProcessStop)
-
 	return nil
 }
 
@@ -109,7 +105,6 @@ func (j *job) waitUntilCompleted() {
 	log.Println("process completed, signaling app")
 
 	j.onProcessCompletion <- true
-	close(j.onProcessCompletion)
 }
 
 func (j *job) onProcessStarted() error {
