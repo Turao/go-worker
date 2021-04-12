@@ -52,7 +52,7 @@ func TestStopWhileJobIsStopping(t *testing.T) {
 	// kill signal has been sent,
 	// os.Process has not terminated yet
 	err := worker.Stop(jobId)
-	assert.Nil(t, err)
+	assert.Equal(t, ErrStopping, err)
 }
 
 func TestStopNotExists(t *testing.T) {

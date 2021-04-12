@@ -38,8 +38,22 @@ func TestJobStopTwice(t *testing.T) {
 	job.Stop()
 	time.Sleep(2 * time.Second)
 
+	// os.Process should have been terminated
+	// by this point
 	err := job.Stop()
 	assert.Equal(t, ErrAlreadyFinished, err)
+}
+
+func TestJobStopWhileStopping(t *testing.T) {
+	job := NewJob("sleep", "10")
+	job.Start()
+	time.Sleep(2 * time.Second)
+	job.Stop()
+
+	// kill signal has been sent,
+	// os.Process has not terminated yet
+	err := job.Stop()
+	assert.Equal(t, ErrStopping, err)
 }
 
 func TestJobStopBeforeStart(t *testing.T) {

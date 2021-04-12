@@ -17,9 +17,15 @@ type job struct {
 	logs  *logs
 
 	cmd                 *exec.Cmd
-	onProcessStart      chan bool
-	onProcessCompletion chan bool
-	onProcessStop       chan bool
+	onProcessStart      signalOnce
+	onProcessCompletion signalOnce
+	onProcessStop       signalOnce
+}
+
+// signalOnce provides a way to cleanly close channels while having concurrent event handler calls (e.g. stop)
+type signalOnce struct {
+	once sync.Once
+	ch   chan bool
 }
 
 func NewJob(name string, args ...string) *job {
@@ -38,24 +44,24 @@ func NewJob(name string, args ...string) *job {
 		logs:  &logs,
 
 		cmd:                 command,
-		onProcessStart:      make(chan bool, 1),
-		onProcessCompletion: make(chan bool, 1),
-		onProcessStop:       make(chan bool, 1),
+		onProcessStart:      signalOnce{once: sync.Once{}, ch: make(chan bool, 1)},
+		onProcessCompletion: signalOnce{once: sync.Once{}, ch: make(chan bool, 1)},
+		onProcessStop:       signalOnce{once: sync.Once{}, ch: make(chan bool, 1)},
 	}
 }
 
 // watch reacts on process signals
 func (j *job) watch() error {
 	go func() {
-		<-j.onProcessStart
+		<-j.onProcessStart.ch
 		j.onProcessStarted()
 	}()
 
 	select {
-	case <-j.onProcessCompletion:
+	case <-j.onProcessCompletion.ch:
 		return j.onProcessCompleted()
 
-	case <-j.onProcessStop:
+	case <-j.onProcessStop.ch:
 		return j.onProcessStopped()
 	}
 }
@@ -69,14 +75,24 @@ func (j *job) Start() error {
 		return ErrAlreadyFinished
 	}
 
-	log.Println("starting job...")
-	err := j.cmd.Start()
+	err := ErrStarting
+	j.onProcessStart.once.Do(func() {
+		log.Println("starting job...")
+		err = j.cmd.Start()
+		if err != nil {
+			return
+		}
+		go j.watch()
+
+		j.onProcessStart.ch <- true
+		close(j.onProcessStart.ch)
+		err = nil
+	})
+
 	if err != nil {
 		return err
 	}
-	go j.watch()
 
-	j.onProcessStart <- true
 	return nil
 }
 
@@ -89,22 +105,36 @@ func (j *job) Stop() error {
 		return ErrAlreadyFinished
 	}
 
-	log.Println("stopping job...")
-	err := j.cmd.Process.Kill()
+	err := ErrStopping
+	j.onProcessStop.once.Do(func() {
+		log.Println("stopping job...")
+		err = j.cmd.Process.Kill()
+		if err != nil {
+			return
+		}
+
+		j.onProcessStop.ch <- true
+		close(j.onProcessStop.ch)
+		err = nil
+	})
+
 	if err != nil {
 		return err
 	}
 
-	j.onProcessStop <- true
 	return nil
 }
 
-func (j *job) waitUntilCompleted() {
-	log.Println("waiting for job process to finish")
-	j.cmd.Process.Wait()
-	log.Println("process completed, signaling app")
+func (j *job) waitUntilCompleted() error {
+	j.onProcessCompletion.once.Do(func() {
+		log.Println("waiting for job process to finish")
+		j.cmd.Process.Wait()
+		log.Println("process completed, signaling app")
 
-	j.onProcessCompletion <- true
+		j.onProcessCompletion.ch <- true
+		close(j.onProcessCompletion.ch)
+	})
+	return nil
 }
 
 func (j *job) onProcessStarted() error {
@@ -181,10 +211,11 @@ func (j *job) hasFinished() bool {
 	return j.state.status == COMPLETED || j.state.status == STOPPED
 }
 
-var ErrAlreadyStarted error = errors.New("job has already been started")
-var ErrAlreadyFinished error = errors.New("job has already finished (either completed or stopped)")
 var ErrNotStarted error = errors.New("job has not started yet")
-var ErrNotFinished error = errors.New("job has not finished yet")
+var ErrStarting error = errors.New("job is starting")
+var ErrAlreadyStarted error = errors.New("job has already been started")
+var ErrStopping error = errors.New("job is stopping")
+var ErrAlreadyFinished error = errors.New("job has already finished (either completed or stopped)")
 
 var ErrNotScheduled error = errors.New("job is not scheduled")
 var ErrNotRunning error = errors.New("job is not running")
