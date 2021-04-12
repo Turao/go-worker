@@ -8,22 +8,31 @@ import (
 )
 
 func TestJobStartOnce(t *testing.T) {
-	job := NewJob("ls", "-lah")
+	job := NewJob("ls")
 
 	err := job.Start()
 	assert.Nil(t, err)
 }
 
-func TestJobStartTwice(t *testing.T) {
-	job := NewJob("ls", "-lah")
+func TestJobStartWhileStarting(t *testing.T) {
+	job := NewJob("ls")
 	job.Start()
 
 	err := job.Start()
-	assert.NotNil(t, err)
+	assert.Equal(t, ErrStarting, err)
+}
+
+func TestJobStartAlreadyStarted(t *testing.T) {
+	job := NewJob("sleep", "3")
+	job.Start()
+	time.Sleep(1 * time.Second)
+
+	err := job.Start()
+	assert.Equal(t, ErrAlreadyStarted, err)
 }
 
 func TestJobStopOnce(t *testing.T) {
-	job := NewJob("sleep", "10")
+	job := NewJob("sleep", "5")
 	job.Start()
 	time.Sleep(1 * time.Second)
 
@@ -31,23 +40,10 @@ func TestJobStopOnce(t *testing.T) {
 	assert.Nil(t, err)
 }
 
-func TestJobStopTwice(t *testing.T) {
-	job := NewJob("sleep", "10")
-	job.Start()
-	time.Sleep(2 * time.Second)
-	job.Stop()
-	time.Sleep(2 * time.Second)
-
-	// os.Process should have been terminated
-	// by this point
-	err := job.Stop()
-	assert.Equal(t, ErrAlreadyFinished, err)
-}
-
 func TestJobStopWhileStopping(t *testing.T) {
-	job := NewJob("sleep", "10")
+	job := NewJob("sleep", "5")
 	job.Start()
-	time.Sleep(2 * time.Second)
+	time.Sleep(1 * time.Second)
 	job.Stop()
 
 	// kill signal has been sent,
@@ -56,8 +52,19 @@ func TestJobStopWhileStopping(t *testing.T) {
 	assert.Equal(t, ErrStopping, err)
 }
 
+func TestJobStopAlreadyFinished(t *testing.T) {
+	job := NewJob("ls")
+	job.Start()
+	time.Sleep(1 * time.Second)
+
+	// os.Process should have been terminated
+	// by this point
+	err := job.Stop()
+	assert.Equal(t, ErrAlreadyFinished, err)
+}
+
 func TestJobStopBeforeStart(t *testing.T) {
-	job := NewJob("ls", "-lah")
+	job := NewJob("ls")
 
 	err := job.Stop()
 	assert.Equal(t, ErrNotStarted, err)
@@ -81,7 +88,7 @@ func TestJobWaitOnJobAlreadyFinished(t *testing.T) {
 }
 
 func TestJobWaitTwice(t *testing.T) {
-	job := NewJob("sleep", "3")
+	job := NewJob("sleep", "5")
 	job.Start()
 	time.Sleep(1 * time.Second)
 	// os.Process should have been started
