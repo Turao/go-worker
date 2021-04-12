@@ -126,6 +126,15 @@ func (j *job) Stop() error {
 }
 
 func (j *job) waitUntilCompleted() error {
+	if !j.hasStarted() {
+		return ErrNotStarted
+	}
+
+	if j.hasFinished() {
+		return ErrAlreadyFinished
+	}
+
+	err := ErrAlreadyWaiting
 	j.onProcessCompletion.once.Do(func() {
 		log.Println("waiting for job process to finish")
 		j.cmd.Process.Wait()
@@ -133,7 +142,13 @@ func (j *job) waitUntilCompleted() error {
 
 		j.onProcessCompletion.ch <- true
 		close(j.onProcessCompletion.ch)
+		err = nil
 	})
+
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -214,6 +229,7 @@ func (j *job) hasFinished() bool {
 var ErrNotStarted error = errors.New("job has not started yet")
 var ErrStarting error = errors.New("job is starting")
 var ErrAlreadyStarted error = errors.New("job has already been started")
+var ErrAlreadyWaiting error = errors.New("job is already waiting for process to complete")
 var ErrStopping error = errors.New("job is stopping")
 var ErrAlreadyFinished error = errors.New("job has already finished (either completed or stopped)")
 
