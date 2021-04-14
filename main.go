@@ -11,7 +11,7 @@ import (
 func main() {
 	worker := worker.NewWorker()
 
-	jobId, err := worker.Dispatch("sleep", "1")
+	jobId, err := worker.Dispatch("ls", "-lah")
 	if err != nil {
 		log.Fatalln(err.Error())
 	}

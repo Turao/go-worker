@@ -3,6 +3,8 @@ package worker
 import (
 	"bytes"
 	"errors"
+	"fmt"
+	"io"
 	"log"
 	"os/exec"
 	"sync"
@@ -153,6 +155,8 @@ func (j *job) waitUntilCompleted() error {
 }
 
 func (j *job) onProcessStarted() error {
+	go j.logs.streamOutput()
+
 	log.Println("process started")
 
 	err := j.state.running()
@@ -288,6 +292,21 @@ type logs struct {
 
 func (l *logs) Output() string {
 	return l.stdout.String()
+}
+
+func (l *logs) streamOutput() {
+	log.Println("streaming stdout")
+	buf := make([]byte, 4)
+	for {
+		n, err := l.stdout.Read(buf)
+		if err != nil {
+			if err != io.EOF {
+				return
+			}
+			fmt.Print(string(buf[:n]))
+		}
+		fmt.Print(string(buf[:n]))
+	}
 }
 
 func (l *logs) Errors() string {
