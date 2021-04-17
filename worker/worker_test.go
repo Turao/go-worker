@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func givenDispatchedJob(t *testing.T, worker *worker) string {
+func givenDispatchedJob(t *testing.T, worker *Worker) string {
 	jobId, err := worker.Dispatch("sleep", "10")
 	if err != nil {
 		t.Fatal("unable to dispatch mock job")
