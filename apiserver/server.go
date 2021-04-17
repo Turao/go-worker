@@ -1,14 +1,51 @@
 package apiserver
 
-type server struct {
-	Service Service // todo: stop exposing the server's Service (doing it so I can test in main() now)
+import (
+	"fmt"
+	"log"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+
+	"github.com/gorilla/mux"
+)
+
+type apiserver struct {
+	server *http.Server
+	Service
 }
 
-func NewServer() *server {
+func NewServer() *apiserver {
 	service := NewWorkerService()
 	service = loggingMiddleware{next: service}
 
-	return &server{
+	r := mux.NewRouter()
+	r.Handle("/v1", makeHandler(service))
+	http.Handle("/", r)
+
+	return &apiserver{
+		server: &http.Server{
+			Addr:    ":8080",
+			Handler: r,
+		},
 		Service: service,
 	}
+}
+
+func (s *apiserver) Serve() {
+	log.Println("[server]", "called")
+	errs := make(chan error, 1)
+	go func() {
+		log.Println("[server]", "serving...")
+		errs <- s.server.ListenAndServe()
+	}()
+
+	go func() {
+		c := make(chan os.Signal)
+		signal.Notify(c, syscall.SIGINT)
+		errs <- fmt.Errorf("[server] interrupted: %s", <-c)
+	}()
+
+	log.Println("[server]", "terminated", <-errs)
 }

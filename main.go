@@ -39,4 +39,7 @@ func main() {
 
 	log.Println("output:\n", logs.Output)
 	log.Println("errors:\n", logs.Errors)
+
+	log.Println("Serving the new API server...")
+	server.Serve()
 }
