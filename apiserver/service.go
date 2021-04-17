@@ -1,12 +1,16 @@
 package apiserver
 
-import "github.com/turao/kami-go/worker"
+import (
+	"context"
+
+	"github.com/turao/kami-go/worker"
+)
 
 type Service interface {
-	Dispatch(name string, args ...string) (string, error)
-	Stop(jobId string) error
-	QueryInfo(jobId string) (JobInfo, error)
-	QueryLogs(jobId string) (JobLogs, error)
+	Dispatch(ctx context.Context, name string, args ...string) (string, error)
+	Stop(ctx context.Context, jobId string) error
+	QueryInfo(ctx context.Context, jobId string) (JobInfo, error)
+	QueryLogs(ctx context.Context, jobId string) (JobLogs, error)
 }
 
 type JobInfo struct {
@@ -30,15 +34,15 @@ func NewWorkerService() *workerservice {
 	}
 }
 
-func (s *workerservice) Dispatch(name string, args ...string) (string, error) {
+func (s *workerservice) Dispatch(ctx context.Context, name string, args ...string) (string, error) {
 	return s.worker.Dispatch(name, args...)
 }
 
-func (s *workerservice) Stop(jobId string) error {
+func (s *workerservice) Stop(ctx context.Context, jobId string) error {
 	return s.worker.Stop(jobId)
 }
 
-func (s *workerservice) QueryInfo(jobId string) (*JobInfo, error) {
+func (s *workerservice) QueryInfo(ctx context.Context, jobId string) (*JobInfo, error) {
 	info, err := s.worker.QueryInfo(jobId)
 	if err != nil {
 		return nil, err
@@ -51,7 +55,7 @@ func (s *workerservice) QueryInfo(jobId string) (*JobInfo, error) {
 	}, nil
 }
 
-func (s *workerservice) QueryLogs(jobId string) (*JobLogs, error) {
+func (s *workerservice) QueryLogs(ctx context.Context, jobId string) (*JobLogs, error) {
 	logs, err := s.worker.QueryLogs(jobId)
 	if err != nil {
 		return nil, err
