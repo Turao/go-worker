@@ -1,17 +1,19 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"log"
 	"time"
 
-	"github.com/turao/kami-go/worker"
+	"github.com/turao/kami-go/apiserver"
 )
 
 func main() {
-	worker := worker.NewWorker()
+	server := apiserver.NewServer()
+	ctx := context.Background()
 
-	jobId, err := worker.Dispatch("ls", "-lah")
+	jobId, err := server.Service.Dispatch(ctx, "ls", "-lah")
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
@@ -20,7 +22,7 @@ func main() {
 	// worker.Stop(jobId)
 	time.Sleep(3 * time.Second)
 
-	info, err := worker.QueryInfo(jobId)
+	info, err := server.Service.QueryInfo(ctx, jobId)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
@@ -30,7 +32,7 @@ func main() {
 
 	time.Sleep(5 * time.Second)
 
-	logs, err := worker.QueryLogs(jobId)
+	logs, err := server.Service.QueryLogs(ctx, jobId)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}

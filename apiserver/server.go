@@ -1,10 +1,14 @@
 package apiserver
 
 type server struct {
-	service Service
+	Service Service // todo: stop exposing the server's Service (doing it so I can test in main() now)
 }
 
-func NewServer() {
+func NewServer() *server {
 	service := NewWorkerService()
 	service = loggingMiddleware{next: service}
+
+	return &server{
+		Service: service,
+	}
 }
