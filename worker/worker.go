@@ -6,19 +6,19 @@ import (
 )
 
 type worker struct {
-	queue *queue
+	pool *pool
 }
 
 func NewWorker() *worker {
-	defaultQueueSize := 100
-	return &worker{queue: NewQueue(defaultQueueSize)}
+	defaultPoolSize := 100
+	return &worker{pool: NewPool(defaultPoolSize)}
 }
 
 func (w *worker) Dispatch(name string, args ...string) (string, error) {
 	log.Println("dispatching new job for command:", name, args)
 
 	job := NewJob(name, args...)
-	err := w.queue.Put(job.id, job)
+	err := w.pool.Put(job.id, job)
 	if err != nil {
 		log.Println("unable to store command", err.Error())
 		return "", err
@@ -34,7 +34,7 @@ func (w *worker) Dispatch(name string, args ...string) (string, error) {
 }
 
 func (w *worker) Stop(jobId string) error {
-	job, err := w.queue.Get(jobId)
+	job, err := w.pool.Get(jobId)
 	if err != nil {
 		// this could be sensitive, maybe log, maybe don't ...
 		log.Println("unable to retrieve job", jobId, err.Error())
@@ -57,7 +57,7 @@ type JobInfo struct {
 }
 
 func (w *worker) QueryInfo(jobId string) (*JobInfo, error) {
-	job, err := w.queue.Get(jobId)
+	job, err := w.pool.Get(jobId)
 	if err != nil {
 		return nil, err
 	}
@@ -75,7 +75,7 @@ type JobLogs struct {
 }
 
 func (w *worker) QueryLogs(jobId string) (*JobLogs, error) {
-	job, err := w.queue.Get(jobId)
+	job, err := w.pool.Get(jobId)
 	if err != nil {
 		return nil, err
 	}

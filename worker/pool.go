@@ -5,19 +5,19 @@ import (
 	"sync"
 )
 
-type queue struct {
+type pool struct {
 	mx   *sync.RWMutex
 	jobs map[string]*job
 }
 
-func NewQueue(size int) *queue {
-	return &queue{
+func NewPool(size int) *pool {
+	return &pool{
 		mx:   &sync.RWMutex{},
 		jobs: make(map[string]*job, size),
 	}
 }
 
-func (q *queue) Put(key string, value *job) error {
+func (q *pool) Put(key string, value *job) error {
 	q.mx.Lock()
 	defer q.mx.Unlock()
 
@@ -31,7 +31,7 @@ func (q *queue) Put(key string, value *job) error {
 	return nil
 }
 
-func (q *queue) Get(id string) (*job, error) {
+func (q *pool) Get(id string) (*job, error) {
 	q.mx.RLock()
 	defer q.mx.RUnlock()
 	job, found := q.jobs[id]
@@ -41,7 +41,7 @@ func (q *queue) Get(id string) (*job, error) {
 	return job, nil
 }
 
-func (q *queue) Remove(id string) error {
+func (q *pool) Remove(id string) error {
 	q.mx.Lock()
 	defer q.mx.Unlock()
 
