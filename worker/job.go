@@ -3,9 +3,9 @@ package worker
 import (
 	"bytes"
 	"errors"
-	"fmt"
 	"io"
 	"log"
+	"os"
 	"os/exec"
 	"sync"
 
@@ -37,8 +37,8 @@ func NewJob(name string, args ...string) *job {
 		stdout: &threadSafeBuffer{mx: sync.RWMutex{}, buf: bytes.Buffer{}},
 		stderr: &threadSafeBuffer{mx: sync.RWMutex{}, buf: bytes.Buffer{}},
 	}
-	command.Stdout = logs.stdout
-	command.Stderr = logs.stderr
+	command.Stdout = io.MultiWriter(os.Stdout, logs.stdout)
+	command.Stderr = io.MultiWriter(os.Stderr, logs.stderr)
 
 	return &job{
 		id:    uuid.New().String(),
@@ -155,7 +155,6 @@ func (j *job) waitUntilCompleted() error {
 }
 
 func (j *job) onProcessStarted() error {
-	go j.logs.streamOutput()
 
 	log.Println("process started")
 
@@ -292,21 +291,6 @@ type logs struct {
 
 func (l *logs) Output() string {
 	return l.stdout.String()
-}
-
-func (l *logs) streamOutput() {
-	log.Println("streaming stdout")
-	buf := make([]byte, 4)
-	for {
-		n, err := l.stdout.Read(buf)
-		if err != nil {
-			if err != io.EOF {
-				return
-			}
-			fmt.Print(string(buf[:n]))
-		}
-		fmt.Print(string(buf[:n]))
-	}
 }
 
 func (l *logs) Errors() string {
