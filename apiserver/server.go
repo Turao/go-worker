@@ -7,8 +7,6 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-
-	"github.com/gorilla/mux"
 )
 
 type apiserver struct {
@@ -20,14 +18,10 @@ func NewServer() *apiserver {
 	service := NewWorkerService()
 	service = loggingMiddleware{next: service}
 
-	r := mux.NewRouter()
-	r.Handle("/v1", makeHandler(service))
-	http.Handle("/", r)
-
 	return &apiserver{
 		server: &http.Server{
 			Addr:    ":8080",
-			Handler: r,
+			Handler: makeHandler(service),
 		},
 		Service: service,
 	}
