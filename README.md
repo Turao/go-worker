@@ -79,7 +79,7 @@ Returns:
   - logging.go: decorates services with custom logging (what is being called and when)
   - service.go: provides application-level features 
 - worker
-  - worker.go: provides appliciation-level feature
+  - worker.go: provides appliciation-level features
 - job
   - job.go: provides core business features such as start, stop, info, ...
     - (this is the main domain entity)
