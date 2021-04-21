@@ -8,8 +8,8 @@ import (
 )
 
 type DispatchRequest struct {
-	Name string
-	Args []string
+	Name string   `json:"name"`
+	Args []string `json:"args"`
 }
 
 type DispatchResponse struct {
@@ -30,7 +30,7 @@ func makeDispatchEndpoint(service Service) endpoint.Endpoint {
 }
 
 type StopRequest struct {
-	ID string
+	ID string `json:"id"`
 }
 
 type StopResponse struct{}
@@ -71,7 +71,7 @@ func makeQueryInfoEndpoint(service Service) endpoint.Endpoint {
 }
 
 type QueryLogsRequest struct {
-	ID string
+	ID string `json:"id"`
 }
 
 type QueryLogsResponse struct {
