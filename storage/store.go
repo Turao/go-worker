@@ -10,10 +10,10 @@ type store struct {
 	items map[string]interface{}
 }
 
-func NewStore(size int) *store {
+func NewStore() *store {
 	return &store{
 		mx:    &sync.RWMutex{},
-		items: make(map[string]interface{}, size),
+		items: make(map[string]interface{}),
 	}
 }
 
