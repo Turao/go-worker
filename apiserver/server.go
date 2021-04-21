@@ -17,15 +17,15 @@ type apiserver struct {
 }
 
 func NewServer(addr string) *apiserver {
-	service := NewWorkerService()
-	service = loggingMiddleware{next: service}
+	workerservice := newWorkerService()
+	workerservice = loggingMiddleware{next: workerservice}
 
 	return &apiserver{
 		server: &http.Server{
 			Addr:    addr,
-			Handler: makeHandler(service),
+			Handler: makeHandler(workerservice),
 		},
-		Service: service,
+		Service: workerservice,
 	}
 }
 

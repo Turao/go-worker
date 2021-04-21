@@ -28,7 +28,7 @@ type workerservice struct {
 	worker *worker.Worker
 }
 
-func NewWorkerService() Service {
+func newWorkerService() Service {
 	return workerservice{
 		worker: worker.NewWorker(),
 	}
