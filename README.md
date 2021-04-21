@@ -68,3 +68,20 @@ Returns:
   "errors": "<stderr>"
 }
 ```
+
+
+### Architecture
+
+- apiserver
+  - server.go: decorates a `http.server` with the `worker` service
+  - transport.go: decodes http requests / encodes http responses
+  - endpoint.go: decorates services with custom instrumentation (monitoring, tracing, ...)
+  - logging.go: decorates services with custom logging (what is being called and when)
+  - service.go: provides application-level features 
+- worker
+  - worker.go: provides appliciation-level feature
+- job
+  - job.go: provides core business features such as start, stop, info, ...
+    - (this is the main domain entity)
+- storage
+  - store.go: in-memory repository

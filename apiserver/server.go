@@ -13,7 +13,6 @@ import (
 
 type apiserver struct {
 	server *http.Server
-	Service
 }
 
 func NewServer(addr string) *apiserver {
@@ -25,7 +24,6 @@ func NewServer(addr string) *apiserver {
 			Addr:    addr,
 			Handler: makeHandler(workerservice),
 		},
-		Service: workerservice,
 	}
 }
 
