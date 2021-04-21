@@ -28,8 +28,8 @@ type Worker struct {
 }
 
 func NewWorker() *Worker {
-	defaultPoolSize := 100
-	return &Worker{store: storage.NewPool(defaultPoolSize)}
+	defaultStoreSize := 100
+	return &Worker{store: storage.NewStore(defaultStoreSize)}
 }
 
 func (w *Worker) Dispatch(name string, args ...string) (string, error) {
