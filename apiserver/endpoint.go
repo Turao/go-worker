@@ -2,7 +2,6 @@ package apiserver
 
 import (
 	"context"
-	"log"
 
 	"github.com/go-kit/kit/endpoint"
 )
@@ -18,7 +17,6 @@ type DispatchResponse struct {
 
 func makeDispatchEndpoint(service Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		log.Println("[dispatch endpoint]", "called")
 		req := request.(DispatchRequest)
 		id, err := service.Dispatch(ctx, req.Name, req.Args...)
 		if err != nil {
@@ -37,7 +35,6 @@ type StopResponse struct{}
 
 func makeStopEndpoint(service Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		log.Println("[stop endpoint]", "called")
 		req := request.(StopRequest)
 		err := service.Stop(ctx, req.ID)
 		return nil, err
@@ -45,7 +42,7 @@ func makeStopEndpoint(service Service) endpoint.Endpoint {
 }
 
 type QueryInfoRequest struct {
-	ID string
+	ID string `json:"id"`
 }
 type QueryInfoResponse struct {
 	ID       string `json:"id"`
@@ -55,7 +52,6 @@ type QueryInfoResponse struct {
 
 func makeQueryInfoEndpoint(service Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		log.Println("[query info endpoint]", "called")
 		req := request.(QueryInfoRequest)
 		info, err := service.QueryInfo(ctx, req.ID)
 		if err != nil {
@@ -81,7 +77,6 @@ type QueryLogsResponse struct {
 
 func makeQueryLogsEndpoint(service Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		log.Println("[query logs endpoint]", "called")
 		req := request.(QueryLogsRequest)
 		logs, err := service.QueryLogs(ctx, req.ID)
 		if err != nil {
