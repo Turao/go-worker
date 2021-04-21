@@ -42,7 +42,7 @@ func NewJob(name string, args ...string) *job {
 
 	return &job{
 		id:    uuid.New().String(),
-		state: &state{mx: &sync.RWMutex{}, status: SCHEDULED},
+		state: &state{mx: &sync.RWMutex{}, status: SCHEDULED, exitCode: UnknownOrTerminated},
 		logs:  &logs,
 
 		cmd:                 command,
@@ -171,7 +171,7 @@ func (j *job) onProcessCompleted() error {
 	log.Println("process completed")
 
 	exitCode := j.cmd.ProcessState.ExitCode()
-	err := j.state.completed(&exitCode)
+	err := j.state.completed(exitCode)
 	if err != nil {
 		return err
 	}
@@ -182,7 +182,7 @@ func (j *job) onProcessStopped() error {
 	log.Println("process stopped")
 
 	exitCode := j.cmd.ProcessState.ExitCode()
-	err := j.state.stopped(&exitCode)
+	err := j.state.stopped(exitCode)
 	if err != nil {
 		return err
 	}
@@ -193,8 +193,10 @@ func (j *job) onProcessStopped() error {
 type state struct {
 	mx       *sync.RWMutex
 	status   status
-	exitCode *int
+	exitCode int
 }
+
+const UnknownOrTerminated = -1
 
 func (s *state) Status() status {
 	s.mx.RLock()
@@ -202,7 +204,7 @@ func (s *state) Status() status {
 	return s.status
 }
 
-func (s *state) ExitCode() *int {
+func (s *state) ExitCode() int {
 	s.mx.RLock()
 	defer s.mx.RUnlock()
 	return s.exitCode
@@ -238,7 +240,6 @@ var ErrAlreadyFinished error = errors.New("job has already finished (either comp
 
 var ErrNotScheduled error = errors.New("job is not scheduled")
 var ErrNotRunning error = errors.New("job is not running")
-var ErrNoExitCode error = errors.New("job terminated without exit code")
 
 func (s *state) running() error {
 	s.mx.Lock()
@@ -251,15 +252,11 @@ func (s *state) running() error {
 	return nil
 }
 
-func (s *state) completed(exitCode *int) error {
+func (s *state) completed(exitCode int) error {
 	s.mx.Lock()
 	defer s.mx.Unlock()
 	if s.status != RUNNING {
 		return ErrNotRunning
-	}
-
-	if exitCode == nil {
-		return ErrNoExitCode
 	}
 
 	s.status = COMPLETED
@@ -267,15 +264,11 @@ func (s *state) completed(exitCode *int) error {
 	return nil
 }
 
-func (s *state) stopped(exitCode *int) error {
+func (s *state) stopped(exitCode int) error {
 	s.mx.Lock()
 	defer s.mx.Unlock()
 	if s.status != RUNNING {
 		return ErrNotRunning
-	}
-
-	if exitCode == nil {
-		return ErrNoExitCode
 	}
 
 	s.status = STOPPED

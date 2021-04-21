@@ -53,7 +53,7 @@ func (w *Worker) Stop(jobId string) error {
 type JobInfo struct {
 	Id       string `json:"id"`
 	Status   string `json:"status"`
-	ExitCode *int   `json:"exitCode,omitempty"`
+	ExitCode int    `json:"exitCode"`
 }
 
 func (w *Worker) QueryInfo(jobId string) (*JobInfo, error) {

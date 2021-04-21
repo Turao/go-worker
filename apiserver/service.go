@@ -16,7 +16,7 @@ type Service interface {
 type JobInfo struct {
 	Id       string `json:"id"`
 	Status   string `json:"status"`
-	ExitCode *int   `json:"exitCode,omitempty"`
+	ExitCode int    `json:"exitCode"`
 }
 
 type JobLogs struct {
