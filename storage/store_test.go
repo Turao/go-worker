@@ -40,7 +40,7 @@ func TestStorePutTwice(t *testing.T) {
 	store.Put("id", job)
 
 	err := store.Put("id", job)
-	assert.Equal(t, ErrIdAlreadyTaken, err)
+	assert.Equal(t, ErrKeyAlreadyTaken, err)
 }
 
 func TestStoreGet(t *testing.T) {

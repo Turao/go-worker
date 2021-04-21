@@ -23,7 +23,7 @@ func (q *store) Put(key string, value interface{}) error {
 
 	// prevent adding the same job twice
 	if _, found := q.items[key]; found {
-		return ErrIdAlreadyTaken
+		return ErrKeyAlreadyTaken
 	}
 
 	// could there be a job in this position already (likely not)
@@ -31,27 +31,27 @@ func (q *store) Put(key string, value interface{}) error {
 	return nil
 }
 
-func (q *store) Get(id string) (interface{}, error) {
+func (q *store) Get(key string) (interface{}, error) {
 	q.mx.RLock()
 	defer q.mx.RUnlock()
-	job, found := q.items[id]
+	job, found := q.items[key]
 	if !found {
 		return nil, ErrNotExists
 	}
 	return job, nil
 }
 
-func (q *store) Remove(id string) error {
+func (q *store) Remove(key string) error {
 	q.mx.Lock()
 	defer q.mx.Unlock()
 
-	if _, found := q.items[id]; !found {
+	if _, found := q.items[key]; !found {
 		return ErrNotExists
 	}
 
-	delete(q.items, id) // I don't like no-ops
+	delete(q.items, key) // I don't like no-ops
 	return nil
 }
 
 var ErrNotExists error = errors.New("job does not exist")
-var ErrIdAlreadyTaken error = errors.New("id has already been taken")
+var ErrKeyAlreadyTaken error = errors.New("key has already been taken")

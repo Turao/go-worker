@@ -10,8 +10,8 @@ import (
 
 type Storage interface {
 	Put(key string, value interface{}) error
-	Get(id string) (interface{}, error)
-	Remove(id string) error
+	Get(key string) (interface{}, error)
+	Remove(key string) error
 }
 
 type Job interface {
