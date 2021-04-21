@@ -21,6 +21,13 @@ func makeHandler(svc Service) http.Handler {
 		opts...,
 	)
 
+	stopHandler := kithttp.NewServer(
+		makeStopEndpoint(svc),
+		decodeStopRequest,
+		encodeResponse,
+		opts...,
+	)
+
 	queryInfoHandler := kithttp.NewServer(
 		makeQueryInfoEndpoint(svc),
 		decodeQueryInfoRequest,
@@ -36,6 +43,7 @@ func makeHandler(svc Service) http.Handler {
 	)
 
 	r.Handle("/job", dispatchHandler).Methods("POST")
+	r.Handle("/job/{id}/stop", stopHandler).Methods("POST")
 
 	r.Handle("/job/{id}/info", queryInfoHandler).Methods("GET")
 	r.Handle("/job/{id}/logs", queryLogsHandler).Methods("GET")
@@ -57,6 +65,18 @@ func decodeDispatchRequest(_ context.Context, r *http.Request) (interface{}, err
 	return DispatchRequest{
 		Name: body.Name,
 		Args: body.Args,
+	}, nil
+}
+
+func decodeStopRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	params := mux.Vars(r)
+	jobID, found := params["id"]
+	if !found {
+		return nil, errors.New("unable to find id in URL params")
+	}
+
+	return StopRequest{
+		ID: jobID,
 	}, nil
 }
 
