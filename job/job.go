@@ -1,4 +1,4 @@
-package worker
+package job
 
 import (
 	"bytes"
@@ -50,6 +50,22 @@ func NewJob(name string, args ...string) *job {
 		onProcessCompletion: signalOnce{once: sync.Once{}, ch: make(chan bool, 1)},
 		onProcessStop:       signalOnce{once: sync.Once{}, ch: make(chan bool, 1)},
 	}
+}
+
+func (j *job) ID() string {
+	return j.id
+}
+
+func (j *job) Status() string {
+	return string(j.state.Status())
+}
+
+func (j *job) ExitCode() int {
+	return j.state.ExitCode()
+}
+
+func (j *job) Logs() (string, string) {
+	return j.logs.Output(), j.logs.Errors()
 }
 
 // watch reacts on process signals

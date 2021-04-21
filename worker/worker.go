@@ -3,22 +3,40 @@ package worker
 import (
 	"fmt"
 	"log"
+
+	"github.com/turao/kami-go/job"
+	"github.com/turao/kami-go/storage"
 )
 
+type Storage interface {
+	Put(key string, value interface{}) error
+	Get(id string) (interface{}, error)
+	Remove(id string) error
+}
+
+type Job interface {
+	ID() string
+	Start() error
+	Stop() error
+	Status() string
+	ExitCode() int
+	Logs() (string, string)
+}
+
 type Worker struct {
-	pool *pool
+	store Storage
 }
 
 func NewWorker() *Worker {
 	defaultPoolSize := 100
-	return &Worker{pool: NewPool(defaultPoolSize)}
+	return &Worker{store: storage.NewPool(defaultPoolSize)}
 }
 
 func (w *Worker) Dispatch(name string, args ...string) (string, error) {
 	log.Println("dispatching new job for command:", name, args)
 
-	job := NewJob(name, args...)
-	err := w.pool.Put(job.id, job)
+	job := job.NewJob(name, args...)
+	err := w.store.Put(job.ID(), job)
 	if err != nil {
 		log.Println("unable to store command", err.Error())
 		return "", err
@@ -30,17 +48,18 @@ func (w *Worker) Dispatch(name string, args ...string) (string, error) {
 		return "", err
 	}
 
-	return job.id, nil
+	return job.ID(), nil
 }
 
 func (w *Worker) Stop(jobId string) error {
-	job, err := w.pool.Get(jobId)
+	item, err := w.store.Get(jobId)
 	if err != nil {
 		// this could be sensitive, maybe log, maybe don't ...
 		log.Println("unable to retrieve job", jobId, err.Error())
 		return err
 	}
 
+	job := item.(Job) // need casting as we don't have generics yet...
 	err = job.Stop()
 	if err != nil {
 		log.Println("unable to stop job", jobId, err.Error())
@@ -57,15 +76,16 @@ type JobInfo struct {
 }
 
 func (w *Worker) QueryInfo(jobId string) (*JobInfo, error) {
-	job, err := w.pool.Get(jobId)
+	item, err := w.store.Get(jobId)
 	if err != nil {
 		return nil, err
 	}
 
+	job := item.(Job) // need casting as we don't have generics yet...
 	return &JobInfo{
-		Id:       fmt.Sprint(job.id),
-		Status:   string(job.state.Status()),
-		ExitCode: job.state.ExitCode(),
+		Id:       fmt.Sprint(job.ID()),
+		Status:   string(job.Status()),
+		ExitCode: job.ExitCode(),
 	}, nil
 }
 
@@ -75,16 +95,16 @@ type JobLogs struct {
 }
 
 func (w *Worker) QueryLogs(jobId string) (*JobLogs, error) {
-	job, err := w.pool.Get(jobId)
+	item, err := w.store.Get(jobId)
 	if err != nil {
 		return nil, err
 	}
 
-	// pull out the logs from the job, but do not expose their pointers
-	logs := &JobLogs{
-		Output: job.logs.Output(),
-		Errors: job.logs.Errors(),
-	}
+	job := item.(Job) // need casting as we don't have generics yet...
+	stdout, stderr := job.Logs()
 
-	return logs, nil
+	return &JobLogs{
+		Output: stdout,
+		Errors: stderr,
+	}, nil
 }

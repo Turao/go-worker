@@ -5,6 +5,8 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/turao/kami-go/job"
+	"github.com/turao/kami-go/storage"
 )
 
 func givenDispatchedJob(t *testing.T, worker *Worker) string {
@@ -41,7 +43,7 @@ func TestStopAlreadyStoppedJob(t *testing.T) {
 	// os.Process should have been terminated
 	// by this point
 	err := worker.Stop(jobId)
-	assert.Equal(t, ErrAlreadyFinished, err)
+	assert.Equal(t, job.ErrAlreadyFinished, err)
 }
 
 func TestStopWhileJobIsStopping(t *testing.T) {
@@ -52,7 +54,7 @@ func TestStopWhileJobIsStopping(t *testing.T) {
 	// kill signal has been sent,
 	// os.Process has not terminated yet
 	err := worker.Stop(jobId)
-	assert.Equal(t, ErrStopping, err)
+	assert.Equal(t, job.ErrStopping, err)
 }
 
 func TestStopNotExists(t *testing.T) {
@@ -60,5 +62,5 @@ func TestStopNotExists(t *testing.T) {
 	givenDispatchedJob(t, worker)
 
 	err := worker.Stop("other")
-	assert.Equal(t, ErrNotExists, err)
+	assert.Equal(t, storage.ErrNotExists, err)
 }

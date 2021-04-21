@@ -1,4 +1,4 @@
-package worker
+package storage
 
 import (
 	"testing"
@@ -6,13 +6,18 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func givenJob() *job {
-	return NewJob("ls", "-lah")
+type item struct {
+	key   string
+	value string
+}
+
+func givenItem() *item {
+	return &item{key: "key", value: "value"}
 }
 
 func givenPoolWithJobAt(t *testing.T, key string) *pool {
 	pool := NewPool(100)
-	job := givenJob()
+	job := givenItem()
 
 	err := pool.Put(key, job)
 	if err != nil {
@@ -22,7 +27,7 @@ func givenPoolWithJobAt(t *testing.T, key string) *pool {
 }
 
 func TestPoolPutOnce(t *testing.T) {
-	job := givenJob()
+	job := givenItem()
 	pool := NewPool(100)
 
 	err := pool.Put("id", job)
@@ -30,7 +35,7 @@ func TestPoolPutOnce(t *testing.T) {
 }
 
 func TestPoolPutTwice(t *testing.T) {
-	job := givenJob()
+	job := givenItem()
 	pool := NewPool(100)
 	pool.Put("id", job)
 
