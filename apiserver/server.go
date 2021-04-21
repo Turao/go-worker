@@ -1,12 +1,14 @@
 package apiserver
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 )
 
 type apiserver struct {
@@ -14,24 +16,29 @@ type apiserver struct {
 	Service
 }
 
-func NewServer() *apiserver {
+func NewServer(addr string) *apiserver {
 	service := NewWorkerService()
 	service = loggingMiddleware{next: service}
 
 	return &apiserver{
 		server: &http.Server{
-			Addr:    ":8080",
+			Addr:    addr,
 			Handler: makeHandler(service),
 		},
 		Service: service,
 	}
 }
 
-func (s *apiserver) Serve() {
-	log.Println("[server]", "called")
+func (s *apiserver) Close() error {
+	return s.server.Close()
+}
+
+func (s *apiserver) ListenAndServe() {
+	log.Println("[server]", "listen and serve")
 	errs := make(chan error, 1)
+
 	go func() {
-		log.Println("[server]", "serving...")
+		log.Println("[server]", "serving on", s.server.Addr)
 		errs <- s.server.ListenAndServe()
 	}()
 
@@ -41,5 +48,14 @@ func (s *apiserver) Serve() {
 		errs <- fmt.Errorf("[server] interrupted: %s", <-c)
 	}()
 
-	log.Println("[server]", "terminated", <-errs)
+	<-errs // blocks until listen throws error or interrupted
+
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	err := s.server.Shutdown(ctx)
+	if err != nil {
+		log.Fatalln("failed to shutdown server")
+	}
+
+	log.Println("[server]", "server shutdown")
 }

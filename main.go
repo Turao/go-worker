@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	server := apiserver.NewServer()
+	server := apiserver.NewServer(":8080")
 	ctx := context.Background()
 
 	jobId, err := server.Service.Dispatch(ctx, "ls", "-lah")
@@ -41,5 +41,5 @@ func main() {
 	log.Println("errors:\n", logs.Errors)
 
 	log.Println("Serving the new API server...")
-	server.Serve()
+	server.ListenAndServe()
 }
