@@ -37,16 +37,16 @@ func (s *apiserver) ListenAndServe() {
 	log.Println("[server]", "listen and serve")
 	errs := make(chan error, 1)
 
-	go func() {
+	go func(errs chan<- error) {
 		log.Println("[server]", "serving on", s.server.Addr)
 		errs <- s.server.ListenAndServe()
-	}()
+	}(errs)
 
-	go func() {
+	go func(errs chan<- error) {
 		c := make(chan os.Signal, 1)
 		signal.Notify(c, syscall.SIGINT)
 		errs <- fmt.Errorf("[server] interrupted: %s", <-c)
-	}()
+	}(errs)
 
 	<-errs // blocks until listen throws error or interrupted
 
