@@ -63,8 +63,12 @@ func (j *job) ExitCode() int {
 	return j.state.ExitCode()
 }
 
-func (j *job) Logs() (string, string) {
-	return j.logs.Output(), j.logs.Errors()
+func (j *job) Output() string {
+	return j.logs.Output()
+}
+
+func (j *job) Errors() string {
+	return j.logs.Errors()
 }
 
 func (j *job) Start() error {

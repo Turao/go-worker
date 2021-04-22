@@ -10,18 +10,14 @@ type Service interface {
 	Dispatch(ctx context.Context, name string, args ...string) (string, error)
 	Stop(ctx context.Context, jobId string) error
 	QueryInfo(ctx context.Context, jobId string) (*JobInfo, error)
-	QueryLogs(ctx context.Context, jobId string) (*JobLogs, error)
 }
 
 type JobInfo struct {
 	Id       string `json:"id"`
 	Status   string `json:"status"`
 	ExitCode int    `json:"exitCode"`
-}
-
-type JobLogs struct {
-	Output string `json:"output"`
-	Errors string `json:"errors"`
+	Output   string `json:"output"`
+	Errors   string `json:"errors"`
 }
 
 type workerservice struct {
@@ -52,17 +48,7 @@ func (s workerservice) QueryInfo(ctx context.Context, jobId string) (*JobInfo, e
 		Id:       info.Id,
 		Status:   info.Status,
 		ExitCode: info.ExitCode,
-	}, nil
-}
-
-func (s workerservice) QueryLogs(ctx context.Context, jobId string) (*JobLogs, error) {
-	logs, err := s.worker.QueryLogs(jobId)
-	if err != nil {
-		return nil, err
-	}
-
-	return &JobLogs{
-		Output: logs.Output,
-		Errors: logs.Errors,
+		Output:   info.Output,
+		Errors:   info.Errors,
 	}, nil
 }

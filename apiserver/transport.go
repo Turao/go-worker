@@ -35,18 +35,10 @@ func makeHandler(svc Service) http.Handler {
 		opts...,
 	)
 
-	queryLogsHandler := kithttp.NewServer(
-		makeQueryLogsEndpoint(svc),
-		decodeQueryLogsRequest,
-		encodeResponse,
-		opts...,
-	)
-
 	r.Handle("/job", dispatchHandler).Methods("POST")
 	r.Handle("/job/{id}/stop", stopHandler).Methods("POST")
 
 	r.Handle("/job/{id}/info", queryInfoHandler).Methods("GET")
-	r.Handle("/job/{id}/logs", queryLogsHandler).Methods("GET")
 
 	return r
 }
@@ -88,18 +80,6 @@ func decodeQueryInfoRequest(_ context.Context, r *http.Request) (interface{}, er
 	}
 
 	return QueryInfoRequest{
-		ID: jobID,
-	}, nil
-}
-
-func decodeQueryLogsRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	params := mux.Vars(r)
-	jobID, found := params["id"]
-	if !found {
-		return nil, errors.New("unable to find id in URL params")
-	}
-
-	return QueryLogsRequest{
 		ID: jobID,
 	}, nil
 }

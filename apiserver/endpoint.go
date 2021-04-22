@@ -48,6 +48,8 @@ type QueryInfoResponse struct {
 	ID       string `json:"id"`
 	Status   string `json:"status"`
 	ExitCode int    `json:"exitCode"`
+	Output   string `json:"output"`
+	Errors   string `json:"errors"`
 }
 
 func makeQueryInfoEndpoint(service Service) endpoint.Endpoint {
@@ -62,30 +64,8 @@ func makeQueryInfoEndpoint(service Service) endpoint.Endpoint {
 			ID:       info.Id,
 			Status:   info.Status,
 			ExitCode: info.ExitCode,
-		}, nil
-	}
-}
-
-type QueryLogsRequest struct {
-	ID string `json:"id"`
-}
-
-type QueryLogsResponse struct {
-	Output string `json:"output,omitempty"`
-	Errors string `json:"errors,omitempty"`
-}
-
-func makeQueryLogsEndpoint(service Service) endpoint.Endpoint {
-	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(QueryLogsRequest)
-		logs, err := service.QueryLogs(ctx, req.ID)
-		if err != nil {
-			return nil, err
-		}
-
-		return QueryLogsResponse{
-			Output: logs.Output,
-			Errors: logs.Errors,
+			Output:   info.Output,
+			Errors:   info.Errors,
 		}, nil
 	}
 }

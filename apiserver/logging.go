@@ -26,9 +26,3 @@ func (l loggingMiddleware) QueryInfo(ctx context.Context, jobId string) (*JobInf
 	defer log.Println("[QueryInfo]", "finished")
 	return l.next.QueryInfo(ctx, jobId)
 }
-
-func (l loggingMiddleware) QueryLogs(ctx context.Context, jobId string) (*JobLogs, error) {
-	log.Println("[QueryLogs]", "called")
-	defer log.Println("[QueryLogs]", "finished")
-	return l.next.QueryLogs(ctx, jobId)
-}

@@ -1,7 +1,6 @@
 package worker
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/turao/kami-go/job"
@@ -20,7 +19,8 @@ type Job interface {
 	Stop() error
 	Status() string
 	ExitCode() int
-	Logs() (string, string)
+	Output() string
+	Errors() string
 }
 
 type Worker struct {
@@ -72,6 +72,8 @@ type JobInfo struct {
 	Id       string `json:"id"`
 	Status   string `json:"status"`
 	ExitCode int    `json:"exitCode"`
+	Output   string `json:"output"`
+	Errors   string `json:"errors"`
 }
 
 func (w *Worker) QueryInfo(jobId string) (*JobInfo, error) {
@@ -81,29 +83,12 @@ func (w *Worker) QueryInfo(jobId string) (*JobInfo, error) {
 	}
 
 	job := item.(Job) // need casting as we don't have generics yet...
+
 	return &JobInfo{
-		Id:       fmt.Sprint(job.ID()),
-		Status:   string(job.Status()),
+		Id:       job.ID(),
+		Status:   job.Status(),
 		ExitCode: job.ExitCode(),
-	}, nil
-}
-
-type JobLogs struct {
-	Output string
-	Errors string
-}
-
-func (w *Worker) QueryLogs(jobId string) (*JobLogs, error) {
-	item, err := w.store.Get(jobId)
-	if err != nil {
-		return nil, err
-	}
-
-	job := item.(Job) // need casting as we don't have generics yet...
-	stdout, stderr := job.Logs()
-
-	return &JobLogs{
-		Output: stdout,
-		Errors: stderr,
+		Output:   job.Output(),
+		Errors:   job.Errors(),
 	}, nil
 }
