@@ -3,6 +3,7 @@
 ## Features
 ### Dispatch a new Job
 Allows users to create and execute processes.
+
 :memo: This is a not a blocking operation (i.e. does not wait for the process to start).
 
 ```
@@ -12,7 +13,12 @@ POST /job
 Receives:
 ```json
 {
-  "command": "<your-command-here>"
+  "name": "<your-command-here>",
+  "args": [
+    "<your-commands-first-argument>",
+    "<your-commands-second-argument>",
+    "<...>"
+  ]
 }
 ```
 
@@ -25,6 +31,7 @@ Returns:
 
 ### Forcefully Stop a Job
 Allows users to stop a running job.
+
 :memo: This is a not a blocking operation (i.e. does not wait for the process to stop).
 
 ```
@@ -38,7 +45,6 @@ Returns:
 
 ### Query Job Info
 Displays information about an existing job.
-This is a blocking operation.
 
 ```
 GET /job/{id}/info
@@ -49,26 +55,11 @@ Returns:
 {
   "id": "<uuid>",
   "status": "<status>",
-  "exitCode": "<exitCode>"
-}
-```
-
-### Query Job Logs
-Display the logs of an existing job.
-This is a blocking operation.
-
-```
-GET /job/{id}/logs
-```
-
-Returns:
-```json
-{
+  "exitCode": "<exitCode>",
   "output": "<stdout>",
   "errors": "<stderr>"
 }
 ```
-
 
 ### Architecture
 
