@@ -63,6 +63,8 @@ Returns:
 
 ### Architecture
 
+> I'm not really sure how to best structure the client layers yet...
+
 - client
   - cli.go: decorates the client with a CLI framework (for parsing command arguments)
   - client.go: provides application services. works like a proxy api
