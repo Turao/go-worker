@@ -63,7 +63,7 @@ Returns:
 
 ### Architecture
 
-- apiserver
+- server
   - server.go: decorates an `http.server` with `worker` handlers
   - transport.go: decodes http requests, encodes http responses
   - endpoint.go: implements an anti-fragile layer, independent of transport (just like a controller)

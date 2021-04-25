@@ -1,4 +1,4 @@
-package apiserver
+package server
 
 import (
 	"context"
@@ -11,15 +11,15 @@ import (
 	"time"
 )
 
-type apiserver struct {
+type server struct {
 	server *http.Server
 }
 
-func NewServer(addr string) *apiserver {
+func NewServer(addr string) *server {
 	workerservice := newWorkerService()
 	workerservice = loggingMiddleware{next: workerservice}
 
-	return &apiserver{
+	return &server{
 		server: &http.Server{
 			Addr:    addr,
 			Handler: makeHandler(workerservice),
@@ -27,11 +27,11 @@ func NewServer(addr string) *apiserver {
 	}
 }
 
-func (s *apiserver) Close() error {
+func (s *server) Close() error {
 	return s.server.Close()
 }
 
-func (s *apiserver) ListenAndServe() {
+func (s *server) ListenAndServe() {
 	log.Println("[server]", "listen and serve")
 	errs := make(chan error, 1)
 

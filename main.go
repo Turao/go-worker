@@ -5,12 +5,12 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/turao/kami-go/apiserver"
 	"github.com/turao/kami-go/client"
+	"github.com/turao/kami-go/server"
 )
 
 func main() {
-	server := apiserver.NewServer(":8080")
+	server := server.NewServer(":8080")
 	log.Println("Serving the new API server...")
 	go func() {
 		server.ListenAndServe()
