@@ -1,10 +1,8 @@
 package client
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
-	"io"
 	"net/http"
 	"net/url"
 
@@ -12,16 +10,29 @@ import (
 	httpkit "github.com/go-kit/kit/transport/http"
 )
 
-func makeStartEndpoint(url *url.URL) endpoint.Endpoint {
+func makeDispatchEndpoint(url *url.URL) endpoint.Endpoint {
 	var opts []httpkit.ClientOption
 
 	return httpkit.NewClient(
 		"POST",
 		url,
-		encodeRequest,
-		decodeResponse,
+		httpkit.EncodeJSONRequest,
+		decodeDispatchResponse,
 		opts...,
 	).Endpoint()
+}
+
+func decodeDispatchResponse(ctx context.Context, r *http.Response) (interface{}, error) {
+	var response struct {
+		ID string `json:"id"`
+	}
+
+	err := json.NewDecoder(r.Body).Decode(&response)
+	if err != nil {
+		return nil, err
+	}
+
+	return response, nil
 }
 
 func makeStopEndpoint(url *url.URL) endpoint.Endpoint {
@@ -30,10 +41,23 @@ func makeStopEndpoint(url *url.URL) endpoint.Endpoint {
 	return httpkit.NewClient(
 		"POST",
 		url,
-		encodeRequest,
-		decodeResponse,
+		httpkit.EncodeJSONRequest,
+		decodeStopResponse,
 		opts...,
 	).Endpoint()
+}
+
+func decodeStopResponse(ctx context.Context, r *http.Response) (interface{}, error) {
+	var response struct {
+		ID string `json:"id"`
+	}
+
+	err := json.NewDecoder(r.Body).Decode(&response)
+	if err != nil {
+		return nil, err
+	}
+
+	return response, nil
 }
 
 func makeQueryEndpoint(url *url.URL) endpoint.Endpoint {
@@ -42,22 +66,25 @@ func makeQueryEndpoint(url *url.URL) endpoint.Endpoint {
 	return httpkit.NewClient(
 		"GET",
 		url,
-		encodeRequest,
-		decodeResponse,
+		httpkit.EncodeJSONRequest,
+		decodeQueryResponse,
 		opts...,
 	).Endpoint()
 }
 
-func encodeRequest(ctx context.Context, r *http.Request, body interface{}) error {
-	var buf bytes.Buffer
-	err := json.NewEncoder(&buf).Encode(body)
-	if err != nil {
-		return err
+func decodeQueryResponse(ctx context.Context, r *http.Response) (interface{}, error) {
+	var response struct {
+		ID       string `json:"id"`
+		Status   string `json:"status"`
+		ExitCode int    `json:"exitCode"`
+		Output   string `json:"output"`
+		Errors   string `json:"errors"`
 	}
-	r.Body = io.NopCloser(&buf)
-	return nil
-}
 
-func decodeResponse(ctx context.Context, r *http.Response) (interface{}, error) {
-	return r, nil
+	err := json.NewDecoder(r.Body).Decode(&response)
+	if err != nil {
+		return nil, err
+	}
+
+	return response, nil
 }

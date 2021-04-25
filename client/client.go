@@ -22,7 +22,7 @@ type client struct {
 
 func New(url *url.URL) *client {
 	return &client{
-		start: makeStartEndpoint(url),
+		start: makeDispatchEndpoint(url),
 		stop:  makeStopEndpoint(url),
 		query: makeQueryEndpoint(url),
 	}
