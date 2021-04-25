@@ -3,8 +3,8 @@ package worker
 import (
 	"log"
 
-	"github.com/turao/kami-go/job"
-	"github.com/turao/kami-go/storage"
+	"github.com/turao/go-worker/job"
+	"github.com/turao/go-worker/storage"
 )
 
 type Storage interface {

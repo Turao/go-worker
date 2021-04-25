@@ -1,4 +1,4 @@
-module github.com/turao/kami-go
+module github.com/turao/go-worker
 
 go 1.16
 

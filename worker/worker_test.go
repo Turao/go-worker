@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/turao/kami-go/job"
-	"github.com/turao/kami-go/storage"
+	"github.com/turao/go-worker/job"
+	"github.com/turao/go-worker/storage"
 )
 
 func givenDispatchedJob(t *testing.T, worker *Worker) string {

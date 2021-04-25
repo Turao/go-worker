@@ -3,7 +3,7 @@ package server
 import (
 	"context"
 
-	"github.com/turao/kami-go/worker"
+	"github.com/turao/go-worker/worker"
 )
 
 type Service interface {

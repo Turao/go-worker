@@ -5,8 +5,8 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/turao/kami-go/client"
-	"github.com/turao/kami-go/server"
+	"github.com/turao/go-worker/client"
+	"github.com/turao/go-worker/server"
 )
 
 func main() {

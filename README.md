@@ -1,4 +1,4 @@
-# kami-go
+# go-worker
 
 ## Features
 ### Dispatch a new Job
