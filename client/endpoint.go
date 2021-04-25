@@ -1,9 +1,6 @@
 package client
 
 import (
-	"context"
-	"encoding/json"
-	"net/http"
 	"net/url"
 
 	"github.com/go-kit/kit/endpoint"
@@ -22,19 +19,6 @@ func makeDispatchEndpoint(url *url.URL) endpoint.Endpoint {
 	).Endpoint()
 }
 
-func decodeDispatchResponse(ctx context.Context, r *http.Response) (interface{}, error) {
-	var response struct {
-		ID string `json:"id"`
-	}
-
-	err := json.NewDecoder(r.Body).Decode(&response)
-	if err != nil {
-		return nil, err
-	}
-
-	return response, nil
-}
-
 func makeStopEndpoint(url *url.URL) endpoint.Endpoint {
 	var opts []httpkit.ClientOption
 
@@ -47,19 +31,6 @@ func makeStopEndpoint(url *url.URL) endpoint.Endpoint {
 	).Endpoint()
 }
 
-func decodeStopResponse(ctx context.Context, r *http.Response) (interface{}, error) {
-	var response struct {
-		ID string `json:"id"`
-	}
-
-	err := json.NewDecoder(r.Body).Decode(&response)
-	if err != nil {
-		return nil, err
-	}
-
-	return response, nil
-}
-
 func makeQueryEndpoint(url *url.URL) endpoint.Endpoint {
 	var opts []httpkit.ClientOption
 
@@ -70,21 +41,4 @@ func makeQueryEndpoint(url *url.URL) endpoint.Endpoint {
 		decodeQueryResponse,
 		opts...,
 	).Endpoint()
-}
-
-func decodeQueryResponse(ctx context.Context, r *http.Response) (interface{}, error) {
-	var response struct {
-		ID       string `json:"id"`
-		Status   string `json:"status"`
-		ExitCode int    `json:"exitCode"`
-		Output   string `json:"output"`
-		Errors   string `json:"errors"`
-	}
-
-	err := json.NewDecoder(r.Body).Decode(&response)
-	if err != nil {
-		return nil, err
-	}
-
-	return response, nil
 }

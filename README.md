@@ -63,6 +63,11 @@ Returns:
 
 ### Architecture
 
+- client
+  - cli.go: decorates the client with a CLI framework (for parsing command arguments)
+  - client.go: provides application services. works like a proxy api
+  - endpoint.go: implements an anti-fragile layer. works like a proxy
+  - transport.go: encodes http requests, decodes http responses
 - server
   - server.go: decorates an `http.server` with `worker` handlers
   - transport.go: decodes http requests, encodes http responses
