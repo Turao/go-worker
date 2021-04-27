@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/go-kit/kit/endpoint"
+	v1 "github.com/turao/go-worker/api/v1"
 )
 
 // client wraps an http client and add a bunch of stuff to it
@@ -32,7 +33,7 @@ func (c *client) Dispatch(name string, args ...string) (interface{}, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
-	request := DispatchRequest{
+	request := v1.DispatchRequest{
 		Name: name,
 		Args: args,
 	}
@@ -49,7 +50,7 @@ func (c *client) Stop(jobID string) (interface{}, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
-	request := StopRequest{
+	request := v1.StopRequest{
 		ID: jobID,
 	}
 
@@ -65,7 +66,7 @@ func (c *client) Query(jobID string) (interface{}, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
-	request := QueryRequest{
+	request := v1.QueryInfoRequest{
 		ID: jobID,
 	}
 

@@ -8,6 +8,7 @@ import (
 
 	kithttp "github.com/go-kit/kit/transport/http"
 	"github.com/gorilla/mux"
+	v1 "github.com/turao/go-worker/api/v1"
 )
 
 func makeHandler(svc Service) http.Handler {
@@ -54,7 +55,7 @@ func decodeDispatchRequest(_ context.Context, r *http.Request) (interface{}, err
 		return nil, err
 	}
 
-	return DispatchRequest{
+	return v1.DispatchRequest{
 		Name: body.Name,
 		Args: body.Args,
 	}, nil
@@ -67,7 +68,7 @@ func decodeStopRequest(_ context.Context, r *http.Request) (interface{}, error) 
 		return nil, errors.New("unable to find id in URL params")
 	}
 
-	return StopRequest{
+	return v1.StopRequest{
 		ID: jobID,
 	}, nil
 }
@@ -79,7 +80,7 @@ func decodeQueryInfoRequest(_ context.Context, r *http.Request) (interface{}, er
 		return nil, errors.New("unable to find id in URL params")
 	}
 
-	return QueryInfoRequest{
+	return v1.QueryInfoRequest{
 		ID: jobID,
 	}, nil
 }

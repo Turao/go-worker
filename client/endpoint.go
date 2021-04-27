@@ -7,16 +7,13 @@ import (
 
 	"github.com/go-kit/kit/endpoint"
 	httpkit "github.com/go-kit/kit/transport/http"
-)
 
-type DispatchRequest struct {
-	Name string   `json:"name"`
-	Args []string `json:"args"`
-}
+	v1 "github.com/turao/go-worker/api/v1"
+)
 
 func makeDispatchEndpoint(url *url.URL) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(DispatchRequest)
+		req := request.(v1.DispatchRequest)
 		url.Path = "/job"
 
 		var opts []httpkit.ClientOption
@@ -31,14 +28,10 @@ func makeDispatchEndpoint(url *url.URL) endpoint.Endpoint {
 	}
 }
 
-type StopRequest struct {
-	ID string `json:"id"`
-}
-
 func makeStopEndpoint(url *url.URL) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(StopRequest)
-		url.Path = fmt.Sprintf("/job/%s", req.ID)
+		req := request.(v1.StopRequest)
+		url.Path = fmt.Sprintf("/job/%s/stop", req.ID)
 
 		var opts []httpkit.ClientOption
 
@@ -53,13 +46,9 @@ func makeStopEndpoint(url *url.URL) endpoint.Endpoint {
 
 }
 
-type QueryRequest struct {
-	ID string `json:"id"`
-}
-
 func makeQueryEndpoint(url *url.URL) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(QueryRequest)
+		req := request.(v1.QueryInfoRequest)
 		url.Path = fmt.Sprintf("/job/%s/info", req.ID)
 
 		var opts []httpkit.ClientOption

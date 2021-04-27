@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"log"
 	"net/url"
 
@@ -40,7 +41,12 @@ func makeDispatchCommand(client Client) *cobra.Command {
 			if err != nil {
 				log.Fatalln(err)
 			}
-			log.Println(res)
+
+			d, err := json.MarshalIndent(res, "", "  ")
+			if err != nil {
+				log.Fatalln(err)
+			}
+			log.Println(string(d))
 		},
 	}
 }
@@ -56,7 +62,11 @@ func makeStopCommand(client Client) *cobra.Command {
 			if err != nil {
 				log.Fatalln(err)
 			}
-			log.Println(res)
+			d, err := json.MarshalIndent(res, "", "  ")
+			if err != nil {
+				log.Fatalln(err)
+			}
+			log.Println(string(d))
 		},
 	}
 }
@@ -72,7 +82,11 @@ func makeQueryCommand(client Client) *cobra.Command {
 			if err != nil {
 				log.Fatalln(err)
 			}
-			log.Println(res)
+			d, err := json.MarshalIndent(res, "", "  ")
+			if err != nil {
+				log.Fatalln(err)
+			}
+			log.Println(string(d))
 		},
 	}
 }
