@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"github.com/turao/go-worker/server"
+	"github.com/turao/go-worker/pkg/server"
 )
 
 func main() {

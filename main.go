@@ -5,8 +5,8 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/turao/go-worker/client"
-	"github.com/turao/go-worker/server"
+	"github.com/turao/go-worker/pkg/client"
+	"github.com/turao/go-worker/pkg/server"
 )
 
 func main() {

@@ -6,7 +6,7 @@ import (
 	"net/url"
 
 	"github.com/spf13/cobra"
-	"github.com/turao/go-worker/client"
+	"github.com/turao/go-worker/pkg/client"
 )
 
 type Client interface {
