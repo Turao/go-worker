@@ -15,20 +15,20 @@ type client struct {
 	// server
 	// logger (?)
 
-	start endpoint.Endpoint
-	stop  endpoint.Endpoint
-	query endpoint.Endpoint
+	dispatch endpoint.Endpoint
+	stop     endpoint.Endpoint
+	query    endpoint.Endpoint
 }
 
 func New(url *url.URL) *client {
 	return &client{
-		start: makeDispatchEndpoint(url),
-		stop:  makeStopEndpoint(url),
-		query: makeQueryEndpoint(url),
+		dispatch: makeDispatchEndpoint(url),
+		stop:     makeStopEndpoint(url),
+		query:    makeQueryEndpoint(url),
 	}
 }
 
-func (c *client) Start(name string, args ...string) (interface{}, error) {
+func (c *client) Dispatch(name string, args ...string) (interface{}, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
@@ -40,7 +40,7 @@ func (c *client) Start(name string, args ...string) (interface{}, error) {
 		Args: args,
 	}
 
-	res, err := c.start(ctx, request)
+	res, err := c.dispatch(ctx, request)
 	if err != nil {
 		return nil, err
 	}

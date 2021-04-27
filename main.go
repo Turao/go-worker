@@ -26,7 +26,7 @@ func main() {
 	}
 	c := client.New(url)
 	log.Println("sending command via client")
-	res, err := c.Start("ls", "-lah")
+	res, err := c.Dispatch("ls", "-lah")
 	if err != nil {
 		log.Fatalln(err)
 	}
