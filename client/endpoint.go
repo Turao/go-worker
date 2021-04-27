@@ -17,8 +17,8 @@ type DispatchRequest struct {
 func makeDispatchEndpoint(url *url.URL) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(DispatchRequest)
-
 		url.Path = "/job"
+
 		var opts []httpkit.ClientOption
 
 		return httpkit.NewClient(
