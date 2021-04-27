@@ -15,7 +15,7 @@ type Client interface {
 }
 
 func NewCLI() *cobra.Command {
-	url, _ := url.Parse("http://localhost:8080/job")
+	url, _ := url.Parse("http://localhost:8080")
 	c := client.New(url)
 
 	cmd := &cobra.Command{

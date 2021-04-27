@@ -32,10 +32,7 @@ func (c *client) Dispatch(name string, args ...string) (interface{}, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
-	request := struct {
-		Name string   `json:"name"`
-		Args []string `json:"args"`
-	}{
+	request := DispatchRequest{
 		Name: name,
 		Args: args,
 	}
@@ -52,10 +49,8 @@ func (c *client) Stop(jobID string) (interface{}, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
-	request := struct {
-		JobID string `json:"id"`
-	}{
-		JobID: jobID,
+	request := StopRequest{
+		ID: jobID,
 	}
 
 	res, err := c.stop(ctx, request)
@@ -70,10 +65,8 @@ func (c *client) Query(jobID string) (interface{}, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
-	request := struct {
-		JobID string `json:"id"`
-	}{
-		JobID: jobID,
+	request := QueryRequest{
+		ID: jobID,
 	}
 
 	res, err := c.query(ctx, request)

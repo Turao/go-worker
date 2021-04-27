@@ -13,7 +13,7 @@ type Service interface {
 }
 
 type JobInfo struct {
-	Id       string `json:"id"`
+	ID       string `json:"id"`
 	Status   string `json:"status"`
 	ExitCode int    `json:"exitCode"`
 	Output   string `json:"output"`
@@ -45,7 +45,7 @@ func (s workerservice) QueryInfo(ctx context.Context, jobId string) (*JobInfo, e
 	}
 
 	return &JobInfo{
-		Id:       info.Id,
+		ID:       info.ID,
 		Status:   info.Status,
 		ExitCode: info.ExitCode,
 		Output:   info.Output,

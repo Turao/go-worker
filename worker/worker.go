@@ -69,7 +69,7 @@ func (w *Worker) Stop(jobId string) error {
 }
 
 type JobInfo struct {
-	Id       string `json:"id"`
+	ID       string `json:"id"`
 	Status   string `json:"status"`
 	ExitCode int    `json:"exitCode"`
 	Output   string `json:"output"`
@@ -85,7 +85,7 @@ func (w *Worker) QueryInfo(jobId string) (*JobInfo, error) {
 	job := item.(Job) // need casting as we don't have generics yet...
 
 	return &JobInfo{
-		Id:       job.ID(),
+		ID:       job.ID(),
 		Status:   job.Status(),
 		ExitCode: job.ExitCode(),
 		Output:   job.Output(),

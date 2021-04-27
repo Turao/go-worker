@@ -61,7 +61,7 @@ func makeQueryInfoEndpoint(service Service) endpoint.Endpoint {
 		}
 
 		return QueryInfoResponse{
-			ID:       info.Id,
+			ID:       info.ID,
 			Status:   info.Status,
 			ExitCode: info.ExitCode,
 			Output:   info.Output,
