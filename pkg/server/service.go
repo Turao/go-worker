@@ -3,7 +3,7 @@ package server
 import (
 	"context"
 
-	"github.com/turao/go-worker/worker"
+	"github.com/turao/go-worker/pkg/worker"
 )
 
 type Service interface {
