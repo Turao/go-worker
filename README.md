@@ -65,21 +65,28 @@ Returns:
 
 > I'm not really sure how to best structure the client layers yet...
 
-- client
-  - cli.go: decorates the client with a CLI framework (for parsing command arguments)
-  - client.go: provides application services. works like a proxy api
-  - endpoint.go: implements an anti-fragile layer. works like a proxy
-  - transport.go: encodes http requests, decodes http responses
-- server
-  - server.go: decorates an `http.server` with `worker` handlers
-  - transport.go: decodes http requests, encodes http responses
-  - endpoint.go: implements an anti-fragile layer, independent of transport (just like a controller)
-  - logging.go: decorates services with custom logging (what is being called and when)
-  - service.go: provides application-level features 
-- worker
-  - worker.go: provides appliciation-level features
-- job
-  - job.go: provides core business features such as start, stop, info, ...
-    - (this is the main domain entity)
-- storage
-  - store.go: in-memory repository
+- api/
+  - v1/
+    - worker.go: worker endpoints (client/server) API
+- cmd/
+  - client
+    - main.go: decorates a client with a nice CLI interface
+  - server
+    - main.go: decorates a server (no CLI interface for now...)
+- pkg/
+  - client
+    - client.go: provides application services. works like a proxy
+    - endpoint.go: implements an anti-fragile layer, independent of transport
+    - transport.go: encodes http requests, sends http requests, decodes http responses
+  - server
+    - server.go: decorates an `http.server` with routing (should I move routing to transport?)
+    - transport.go: decodes http requests, encodes http responses
+    - endpoint.go: implements an anti-fragile layer, independent of transport (just like a controller)
+    - logging.go: decorates services with custom logging (what is being called and when)
+    - service.go: provides application-level features
+  - worker
+    - worker.go: manages jobs
+  - job
+    - job.go: manages a unix process
+  - storage
+    - store.go: in-memory repository
