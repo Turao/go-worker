@@ -188,7 +188,6 @@ func (j *job) watch() error {
 }
 
 func (j *job) onProcessStarted() error {
-
 	log.Println("process started")
 
 	err := j.state.running()
