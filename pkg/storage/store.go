@@ -10,6 +10,9 @@ type store struct {
 	items map[string]interface{}
 }
 
+var ErrNotExists error = errors.New("job does not exist")
+var ErrKeyAlreadyTaken error = errors.New("key has already been taken")
+
 func NewStore() *store {
 	return &store{
 		mx:    &sync.RWMutex{},
@@ -52,6 +55,3 @@ func (q *store) Remove(key string) error {
 	delete(q.items, key) // I don't like no-ops
 	return nil
 }
-
-var ErrNotExists error = errors.New("job does not exist")
-var ErrKeyAlreadyTaken error = errors.New("key has already been taken")
