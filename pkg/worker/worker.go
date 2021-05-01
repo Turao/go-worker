@@ -53,7 +53,6 @@ func (w *Worker) Dispatch(name string, args ...string) (string, error) {
 func (w *Worker) Stop(jobID string) error {
 	item, err := w.store.Get(jobID)
 	if err != nil {
-		// this could be sensitive, maybe log, maybe don't ...
 		log.Println("unable to retrieve job", jobID, err.Error())
 		return err
 	}
