@@ -34,7 +34,7 @@ func NewWorker() *Worker {
 func (w *Worker) Dispatch(name string, args ...string) (string, error) {
 	log.Println("dispatching new job for command:", name, args)
 
-	job := job.NewJob(name, args...)
+	job := job.New(name, args...)
 	err := w.store.Put(job.ID(), job)
 	if err != nil {
 		log.Println("unable to store command", err.Error())

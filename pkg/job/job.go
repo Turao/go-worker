@@ -38,7 +38,7 @@ var ErrAlreadyWaiting error = errors.New("job is already waiting for process to 
 var ErrStopping error = errors.New("job is stopping")
 var ErrAlreadyFinished error = errors.New("job has already finished (either completed or stopped)")
 
-func NewJob(name string, args ...string) *job {
+func New(name string, args ...string) *job {
 	command := exec.Command(name, args...)
 
 	logs := logs{

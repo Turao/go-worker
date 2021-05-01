@@ -8,14 +8,14 @@ import (
 )
 
 func TestJobStartOnce(t *testing.T) {
-	job := NewJob("ls")
+	job := New("ls")
 
 	err := job.Start()
 	assert.Nil(t, err)
 }
 
 func TestJobStartWhileStarting(t *testing.T) {
-	job := NewJob("ls")
+	job := New("ls")
 	job.Start()
 
 	err := job.Start()
@@ -23,7 +23,7 @@ func TestJobStartWhileStarting(t *testing.T) {
 }
 
 func TestJobStartAlreadyStarted(t *testing.T) {
-	job := NewJob("sleep", "3")
+	job := New("sleep", "3")
 	job.Start()
 	time.Sleep(1 * time.Second)
 
@@ -32,7 +32,7 @@ func TestJobStartAlreadyStarted(t *testing.T) {
 }
 
 func TestJobStopOnce(t *testing.T) {
-	job := NewJob("sleep", "5")
+	job := New("sleep", "5")
 	job.Start()
 	time.Sleep(1 * time.Second)
 
@@ -41,7 +41,7 @@ func TestJobStopOnce(t *testing.T) {
 }
 
 func TestJobStopWhileStopping(t *testing.T) {
-	job := NewJob("sleep", "5")
+	job := New("sleep", "5")
 	job.Start()
 	time.Sleep(1 * time.Second)
 	job.Stop()
@@ -53,7 +53,7 @@ func TestJobStopWhileStopping(t *testing.T) {
 }
 
 func TestJobStopAlreadyFinished(t *testing.T) {
-	job := NewJob("ls")
+	job := New("ls")
 	job.Start()
 	time.Sleep(1 * time.Second)
 
@@ -64,21 +64,21 @@ func TestJobStopAlreadyFinished(t *testing.T) {
 }
 
 func TestJobStopOnJobNotStarted(t *testing.T) {
-	job := NewJob("ls")
+	job := New("ls")
 
 	err := job.Stop()
 	assert.Equal(t, ErrNotStarted, err)
 }
 
 func TestJobWaitOnJobNotStarted(t *testing.T) {
-	job := NewJob("sleep", "3")
+	job := New("sleep", "3")
 
 	err := job.waitUntilCompleted()
 	assert.Equal(t, ErrNotStarted, err)
 }
 
 func TestJobWaitOnJobAlreadyFinished(t *testing.T) {
-	job := NewJob("ls")
+	job := New("ls")
 	job.Start()
 	time.Sleep(1 * time.Second)
 	// os.Process should have been completed
@@ -88,7 +88,7 @@ func TestJobWaitOnJobAlreadyFinished(t *testing.T) {
 }
 
 func TestJobWaitWhileAlreadyWaiting(t *testing.T) {
-	job := NewJob("sleep", "3")
+	job := New("sleep", "3")
 	job.Start()
 	time.Sleep(1 * time.Second)
 	// os.Process should have been started
