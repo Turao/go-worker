@@ -17,16 +17,17 @@ type job struct {
 	state *state
 	logs  *logs
 
-	cmd                 *exec.Cmd
+	cmd *exec.Cmd
+
 	onProcessStart      signalOnce
 	onProcessCompletion signalOnce
 	onProcessStop       signalOnce
 }
 
-// signalOnce provides a way to cleanly close channels while having concurrent event handler calls (e.g. stop)
+// signalOnce provides a way to cleanly send messages/close channels while having concurrent event handler calls (e.g. stop)
 type signalOnce struct {
 	once sync.Once
-	ch   chan bool
+	ch   chan interface{}
 }
 
 func NewJob(name string, args ...string) *job {
@@ -45,9 +46,9 @@ func NewJob(name string, args ...string) *job {
 		logs:  &logs,
 
 		cmd:                 command,
-		onProcessStart:      signalOnce{once: sync.Once{}, ch: make(chan bool, 1)},
-		onProcessCompletion: signalOnce{once: sync.Once{}, ch: make(chan bool, 1)},
-		onProcessStop:       signalOnce{once: sync.Once{}, ch: make(chan bool, 1)},
+		onProcessStart:      signalOnce{once: sync.Once{}, ch: make(chan interface{}, 1)},
+		onProcessCompletion: signalOnce{once: sync.Once{}, ch: make(chan interface{}, 1)},
+		onProcessStop:       signalOnce{once: sync.Once{}, ch: make(chan interface{}, 1)},
 	}
 }
 
@@ -141,11 +142,16 @@ func (j *job) waitUntilCompleted() error {
 
 	err := ErrAlreadyWaiting
 	j.onProcessCompletion.once.Do(func() {
-		log.Println("waiting for job process to finish")
-		j.cmd.Process.Wait()
-		log.Println("process completed, signaling app")
+		log.Println("waiting for job process to complete")
+		// wait releases all process resources (and creates a new os.ProcessState on return)
+		// we need to propagate the process state value somehow...
+		ps, err := j.cmd.Process.Wait()
+		if err != nil {
+			return
+		}
+		log.Println("process completed, signaling job")
 
-		j.onProcessCompletion.ch <- true
+		j.onProcessCompletion.ch <- ps
 		close(j.onProcessCompletion.ch)
 		err = nil
 	})
@@ -165,8 +171,8 @@ func (j *job) watch() error {
 	}()
 
 	select {
-	case <-j.onProcessCompletion.ch:
-		return j.onProcessCompleted()
+	case ps := <-j.onProcessCompletion.ch:
+		return j.onProcessCompleted(ps.(*os.ProcessState))
 
 	case <-j.onProcessStop.ch:
 		return j.onProcessStopped()
@@ -186,10 +192,10 @@ func (j *job) onProcessStarted() error {
 	return nil
 }
 
-func (j *job) onProcessCompleted() error {
-	log.Println("process completed")
+func (j *job) onProcessCompleted(ps *os.ProcessState) error {
+	log.Println("process completed", j.cmd.ProcessState)
 
-	exitCode := j.cmd.ProcessState.ExitCode()
+	exitCode := ps.ExitCode()
 	err := j.state.completed(exitCode)
 	if err != nil {
 		return err
