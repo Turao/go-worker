@@ -14,6 +14,9 @@ type state struct {
 
 const UnknownOrTerminated = -1
 
+var ErrNotScheduled error = errors.New("job is not scheduled")
+var ErrNotRunning error = errors.New("job is not running")
+
 func (s *state) Status() status {
 	s.mx.RLock()
 	defer s.mx.RUnlock()
@@ -81,13 +84,3 @@ func (s *state) stopped(exitCode int) error {
 	s.exitCode = exitCode
 	return nil
 }
-
-var ErrNotStarted error = errors.New("job has not started yet")
-var ErrStarting error = errors.New("job is starting")
-var ErrAlreadyStarted error = errors.New("job has already been started")
-var ErrAlreadyWaiting error = errors.New("job is already waiting for process to complete")
-var ErrStopping error = errors.New("job is stopping")
-var ErrAlreadyFinished error = errors.New("job has already finished (either completed or stopped)")
-
-var ErrNotScheduled error = errors.New("job is not scheduled")
-var ErrNotRunning error = errors.New("job is not running")

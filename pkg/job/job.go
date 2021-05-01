@@ -2,6 +2,7 @@ package job
 
 import (
 	"bytes"
+	"errors"
 	"io"
 	"log"
 	"os"
@@ -29,6 +30,13 @@ type signalOnce struct {
 	once sync.Once
 	ch   chan interface{}
 }
+
+var ErrNotStarted error = errors.New("job has not started yet")
+var ErrStarting error = errors.New("job is starting")
+var ErrAlreadyStarted error = errors.New("job has already been started")
+var ErrAlreadyWaiting error = errors.New("job is already waiting for process to complete")
+var ErrStopping error = errors.New("job is stopping")
+var ErrAlreadyFinished error = errors.New("job has already finished (either completed or stopped)")
 
 func NewJob(name string, args ...string) *job {
 	command := exec.Command(name, args...)
