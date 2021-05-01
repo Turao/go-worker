@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	server := server.NewServer(":8080")
+	server := server.New(":8080")
 	log.Println("Serving the new API server...")
 	server.ListenAndServe()
 }

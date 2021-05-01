@@ -15,7 +15,7 @@ type server struct {
 	server *http.Server
 }
 
-func NewServer(addr string) *server {
+func New(addr string) *server {
 	workerservice := newWorkerService()
 	workerservice = loggingMiddleware{next: workerservice}
 
