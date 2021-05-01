@@ -5,12 +5,12 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+
+	v1 "github.com/turao/go-worker/api/v1"
 )
 
 func decodeDispatchResponse(ctx context.Context, r *http.Response) (interface{}, error) {
-	var response struct {
-		ID string `json:"id"`
-	}
+	var response v1.DispatchResponse
 
 	err := json.NewDecoder(r.Body).Decode(&response)
 	if err != nil {
@@ -21,9 +21,7 @@ func decodeDispatchResponse(ctx context.Context, r *http.Response) (interface{},
 }
 
 func decodeStopResponse(ctx context.Context, r *http.Response) (interface{}, error) {
-	var response struct {
-		Error error `json:"error,omitempty"`
-	}
+	var response v1.StopResponse
 
 	if r.StatusCode != http.StatusOK {
 		return nil, errors.New(r.Status)
@@ -33,13 +31,7 @@ func decodeStopResponse(ctx context.Context, r *http.Response) (interface{}, err
 }
 
 func decodeQueryResponse(ctx context.Context, r *http.Response) (interface{}, error) {
-	var response struct {
-		ID       string `json:"id"`
-		Status   string `json:"status"`
-		ExitCode int    `json:"exitCode,omitempty"`
-		Output   string `json:"output,omitempty"`
-		Errors   string `json:"errors,omitempty"`
-	}
+	var response v1.QueryInfoResponse
 
 	err := json.NewDecoder(r.Body).Decode(&response)
 	if err != nil {
