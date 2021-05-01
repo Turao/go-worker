@@ -10,50 +10,50 @@ import (
 )
 
 func givenDispatchedJob(t *testing.T, worker *Worker) string {
-	jobId, err := worker.Dispatch("sleep", "10")
+	jobID, err := worker.Dispatch("sleep", "10")
 	if err != nil {
 		t.Fatal("unable to dispatch mock job")
 	}
 	time.Sleep(2 * time.Second)
-	return jobId
+	return jobID
 }
 
 func TestDispatch(t *testing.T) {
 	worker := NewWorker()
 
-	jobId, err := worker.Dispatch("ls", "-lah")
+	jobID, err := worker.Dispatch("ls", "-lah")
 	assert.Nil(t, err)
-	assert.NotNil(t, jobId)
+	assert.NotNil(t, jobID)
 }
 
 func TestStopOnce(t *testing.T) {
 	worker := NewWorker()
-	jobId := givenDispatchedJob(t, worker)
+	jobID := givenDispatchedJob(t, worker)
 
-	err := worker.Stop(jobId)
+	err := worker.Stop(jobID)
 	assert.Nil(t, err)
 }
 
 func TestStopAlreadyStoppedJob(t *testing.T) {
 	worker := NewWorker()
-	jobId := givenDispatchedJob(t, worker)
-	worker.Stop(jobId)
+	jobID := givenDispatchedJob(t, worker)
+	worker.Stop(jobID)
 	time.Sleep(1 * time.Second)
 
 	// os.Process should have been terminated
 	// by this point
-	err := worker.Stop(jobId)
+	err := worker.Stop(jobID)
 	assert.Equal(t, job.ErrAlreadyFinished, err)
 }
 
 func TestStopWhileJobIsStopping(t *testing.T) {
 	worker := NewWorker()
-	jobId := givenDispatchedJob(t, worker)
-	worker.Stop(jobId)
+	jobID := givenDispatchedJob(t, worker)
+	worker.Stop(jobID)
 
 	// kill signal has been sent,
 	// os.Process has not terminated yet
-	err := worker.Stop(jobId)
+	err := worker.Stop(jobID)
 	assert.Equal(t, job.ErrStopping, err)
 }
 

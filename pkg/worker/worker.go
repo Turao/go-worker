@@ -50,18 +50,18 @@ func (w *Worker) Dispatch(name string, args ...string) (string, error) {
 	return job.ID(), nil
 }
 
-func (w *Worker) Stop(jobId string) error {
-	item, err := w.store.Get(jobId)
+func (w *Worker) Stop(jobID string) error {
+	item, err := w.store.Get(jobID)
 	if err != nil {
 		// this could be sensitive, maybe log, maybe don't ...
-		log.Println("unable to retrieve job", jobId, err.Error())
+		log.Println("unable to retrieve job", jobID, err.Error())
 		return err
 	}
 
 	job := item.(Job) // need casting as we don't have generics yet...
 	err = job.Stop()
 	if err != nil {
-		log.Println("unable to stop job", jobId, err.Error())
+		log.Println("unable to stop job", jobID, err.Error())
 		return err
 	}
 
@@ -76,8 +76,8 @@ type JobInfo struct {
 	Errors   string `json:"errors"`
 }
 
-func (w *Worker) QueryInfo(jobId string) (*JobInfo, error) {
-	item, err := w.store.Get(jobId)
+func (w *Worker) QueryInfo(jobID string) (*JobInfo, error) {
+	item, err := w.store.Get(jobID)
 	if err != nil {
 		return nil, err
 	}
