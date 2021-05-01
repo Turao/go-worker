@@ -13,7 +13,7 @@ type store struct {
 var ErrNotExists error = errors.New("job does not exist")
 var ErrKeyAlreadyTaken error = errors.New("key has already been taken")
 
-func NewStore() *store {
+func New() *store {
 	return &store{
 		mx:    &sync.RWMutex{},
 		items: make(map[string]interface{}),

@@ -28,7 +28,7 @@ type Worker struct {
 }
 
 func NewWorker() *Worker {
-	return &Worker{store: storage.NewStore()}
+	return &Worker{store: storage.New()}
 }
 
 func (w *Worker) Dispatch(name string, args ...string) (string, error) {

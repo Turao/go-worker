@@ -16,7 +16,7 @@ func givenItem() *item {
 }
 
 func givenStoreWithJobAt(t *testing.T, key string) *store {
-	store := NewStore()
+	store := New()
 	job := givenItem()
 
 	err := store.Put(key, job)
@@ -28,7 +28,7 @@ func givenStoreWithJobAt(t *testing.T, key string) *store {
 
 func TestStorePutOnce(t *testing.T) {
 	job := givenItem()
-	store := NewStore()
+	store := New()
 
 	err := store.Put("id", job)
 	assert.Nil(t, err)
@@ -36,7 +36,7 @@ func TestStorePutOnce(t *testing.T) {
 
 func TestStorePutTwice(t *testing.T) {
 	job := givenItem()
-	store := NewStore()
+	store := New()
 	store.Put("id", job)
 
 	err := store.Put("id", job)
