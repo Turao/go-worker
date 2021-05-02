@@ -38,18 +38,6 @@ const (
 	STOPPED   = "stopped"
 )
 
-func (j *job) hasStarted() bool {
-	j.state.mx.RLock()
-	defer j.state.mx.RUnlock()
-	return j.state.status != SCHEDULED
-}
-
-func (j *job) hasFinished() bool {
-	j.state.mx.RLock()
-	defer j.state.mx.RUnlock()
-	return j.state.status == COMPLETED || j.state.status == STOPPED
-}
-
 func (s *state) running() error {
 	s.mx.Lock()
 	defer s.mx.Unlock()

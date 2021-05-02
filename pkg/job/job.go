@@ -220,3 +220,11 @@ func (j *job) onProcessStopped() error {
 	}
 	return nil
 }
+
+func (j *job) hasStarted() bool {
+	return j.state.Status() != SCHEDULED
+}
+
+func (j *job) hasFinished() bool {
+	return j.state.Status() == COMPLETED || j.state.Status() == STOPPED
+}
