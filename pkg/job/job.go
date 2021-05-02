@@ -195,7 +195,7 @@ func (j *job) onProcessStarted() error {
 }
 
 func (j *job) onProcessCompleted(ps *os.ProcessState) error {
-	log.Println("process completed", j.cmd.ProcessState)
+	log.Println("process completed with status", ps)
 
 	exitCode := ps.ExitCode()
 	err := j.state.completed(exitCode)
