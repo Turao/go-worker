@@ -13,8 +13,14 @@ type Service interface {
 	QueryInfo(ctx context.Context, jobId string) (*job.JobInfo, error)
 }
 
+type Worker interface {
+	Dispatch(name string, args ...string) (string, error)
+	Stop(jobId string) error
+	QueryInfo(jobId string) (*job.JobInfo, error)
+}
+
 type workerservice struct {
-	worker *worker.Worker
+	worker Worker
 }
 
 func newWorkerService() Service {

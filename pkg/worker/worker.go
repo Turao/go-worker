@@ -20,15 +20,15 @@ type Job interface {
 	Info() *job.JobInfo
 }
 
-type Worker struct {
+type worker struct {
 	store Storage
 }
 
-func NewWorker() *Worker {
-	return &Worker{store: storage.New()}
+func NewWorker() *worker {
+	return &worker{store: storage.New()}
 }
 
-func (w *Worker) Dispatch(name string, args ...string) (string, error) {
+func (w *worker) Dispatch(name string, args ...string) (string, error) {
 	log.Println("dispatching new job for command:", name, args)
 
 	job := job.New(name, args...)
@@ -47,7 +47,7 @@ func (w *Worker) Dispatch(name string, args ...string) (string, error) {
 	return job.ID(), nil
 }
 
-func (w *Worker) Stop(jobID string) error {
+func (w *worker) Stop(jobID string) error {
 	item, err := w.store.Get(string(jobID))
 	if err != nil {
 		log.Println("unable to retrieve job", jobID, err.Error())
@@ -64,7 +64,7 @@ func (w *Worker) Stop(jobID string) error {
 	return nil
 }
 
-func (w *Worker) QueryInfo(jobID string) (*job.JobInfo, error) {
+func (w *worker) QueryInfo(jobID string) (*job.JobInfo, error) {
 	item, err := w.store.Get(string(jobID))
 	if err != nil {
 		return nil, err

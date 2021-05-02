@@ -9,7 +9,7 @@ import (
 	"github.com/turao/go-worker/pkg/storage"
 )
 
-func givenDispatchedJob(t *testing.T, worker *Worker) string {
+func givenDispatchedJob(t *testing.T, worker *worker) string {
 	jobID, err := worker.Dispatch("sleep", "10")
 	if err != nil {
 		t.Fatal("unable to dispatch mock job")
