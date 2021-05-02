@@ -15,14 +15,14 @@ func makeDispatchEndpoint(service Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		return v1.DispatchResponse{ID: id}, nil
+		return v1.DispatchResponse{ID: v1.JobID(id)}, nil
 	}
 }
 
 func makeStopEndpoint(service Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(v1.StopRequest)
-		err := service.Stop(ctx, req.ID)
+		err := service.Stop(ctx, string(req.ID))
 		return nil, err
 	}
 }
@@ -30,13 +30,19 @@ func makeStopEndpoint(service Service) endpoint.Endpoint {
 func makeQueryInfoEndpoint(service Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(v1.QueryInfoRequest)
-		info, err := service.QueryInfo(ctx, req.ID)
+		info, err := service.QueryInfo(ctx, string(req.ID))
 		if err != nil {
 			return nil, err
 		}
 
 		return v1.QueryInfoResponse{
-			JobInfo: *info,
+			JobInfo: v1.JobInfo{
+				ID:       v1.JobID(info.ID),
+				Status:   info.Status,
+				ExitCode: info.ExitCode,
+				Output:   info.Output,
+				Errors:   info.Errors,
+			},
 		}, nil
 	}
 }

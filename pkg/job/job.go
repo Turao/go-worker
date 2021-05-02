@@ -10,7 +10,6 @@ import (
 	"sync"
 
 	"github.com/google/uuid"
-	v1 "github.com/turao/go-worker/api/v1"
 )
 
 type job struct {
@@ -30,6 +29,14 @@ type job struct {
 type signalOnce struct {
 	once sync.Once
 	ch   chan interface{}
+}
+
+type JobInfo struct {
+	ID       string `json:"id"`
+	Status   string `json:"status"`
+	ExitCode int    `json:"exitCode"`
+	Output   string `json:"output"`
+	Errors   string `json:"errors"`
 }
 
 var ErrNotStarted error = errors.New("job has not started yet")
@@ -61,8 +68,8 @@ func New(name string, args ...string) *job {
 	}
 }
 
-func (j *job) ID() v1.JobID {
-	return v1.JobID(j.id)
+func (j *job) ID() string {
+	return j.id
 }
 
 func (j *job) Start() error {
@@ -124,9 +131,9 @@ func (j *job) Stop() error {
 	return nil
 }
 
-func (j *job) Info() *v1.JobInfo {
-	return &v1.JobInfo{
-		ID:       v1.JobID(j.id),
+func (j *job) Info() *JobInfo {
+	return &JobInfo{
+		ID:       j.id,
 		Status:   string(j.state.Status()),
 		ExitCode: j.state.ExitCode(),
 		Output:   j.logs.Output(),

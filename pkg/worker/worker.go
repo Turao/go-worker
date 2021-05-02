@@ -3,7 +3,6 @@ package worker
 import (
 	"log"
 
-	v1 "github.com/turao/go-worker/api/v1"
 	"github.com/turao/go-worker/pkg/job"
 	"github.com/turao/go-worker/pkg/storage"
 )
@@ -15,10 +14,10 @@ type Storage interface {
 }
 
 type Job interface {
-	ID() v1.JobID
+	ID() string
 	Start() error
 	Stop() error
-	Info() *v1.JobInfo
+	Info() *job.JobInfo
 }
 
 type Worker struct {
@@ -29,7 +28,7 @@ func NewWorker() *Worker {
 	return &Worker{store: storage.New()}
 }
 
-func (w *Worker) Dispatch(name string, args ...string) (v1.JobID, error) {
+func (w *Worker) Dispatch(name string, args ...string) (string, error) {
 	log.Println("dispatching new job for command:", name, args)
 
 	job := job.New(name, args...)
@@ -48,7 +47,7 @@ func (w *Worker) Dispatch(name string, args ...string) (v1.JobID, error) {
 	return job.ID(), nil
 }
 
-func (w *Worker) Stop(jobID v1.JobID) error {
+func (w *Worker) Stop(jobID string) error {
 	item, err := w.store.Get(string(jobID))
 	if err != nil {
 		log.Println("unable to retrieve job", jobID, err.Error())
@@ -65,7 +64,7 @@ func (w *Worker) Stop(jobID v1.JobID) error {
 	return nil
 }
 
-func (w *Worker) QueryInfo(jobID v1.JobID) (*v1.JobInfo, error) {
+func (w *Worker) QueryInfo(jobID string) (*job.JobInfo, error) {
 	item, err := w.store.Get(string(jobID))
 	if err != nil {
 		return nil, err
