@@ -1,14 +1,15 @@
 # go-worker
 
 ### Features
-**Dispatch Job**
-Endpoint: `POST /job`
-```yaml
-# Allows users to create and execute a unix process.
-  # This is a not a blocking operation 
-  # (i.e. does not wait for the process to start).
 
-# Receives:
+**Dispatch Job**
+```yaml
+Endpoint: POST /job
+Description: |-
+  Allows users to create and execute a unix process.
+  This is a not a blocking operation (i.e. does not wait for the process to start).
+ 
+Request:
 {
   "name": "<your-command-here>",
   "args": [
@@ -18,30 +19,30 @@ Endpoint: `POST /job`
   ]
 }
 
-# Returns:
+Response:
 {
   "id": "<uuid>"
 }
 ```
 
 **Stop Job**
-Endpoint: `POST /job/{id}/stop`
 ```yaml
-# Allows users to stop a running job.
-  # This is a not a blocking operation 
-  # (i.e. does not wait for the process to stop).
+Endpoint: POST /job/{id}/stop
+Description: |-
+  Allows users to stop a running job.
+  This is a not a blocking operation (i.e. does not wait for the process to stop).
 
-# Returns:
-- `HTTP Status 200 (Sucessful)`
-- `HTTP Status 404 (Not Found)`
-- `HTTP Status 500 (Internal Error)`
+Response:
+  - HTTP Status 200 (Sucessful)
+  - HTTP Status 404 (Not Found)
+  - HTTP Status 500 (Internal Error)
 ```
 
 **Query Job Info:**
-Endpoint: `GET /job/{id}/info`
 ```yaml
-# Displays information about an existing job.
-# Returns:
+Endpoint: `GET /job/{id}/info`
+Description: Displays information about an existing job.
+Response:
 {
   "id": "<uuid>",
   "status": "<status>",
