@@ -5,11 +5,12 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	v1 "github.com/turao/go-worker/api/v1"
 	"github.com/turao/go-worker/pkg/job"
 	"github.com/turao/go-worker/pkg/storage"
 )
 
-func givenDispatchedJob(t *testing.T, worker *Worker) string {
+func givenDispatchedJob(t *testing.T, worker *Worker) v1.JobID {
 	jobID, err := worker.Dispatch("sleep", "10")
 	if err != nil {
 		t.Fatal("unable to dispatch mock job")

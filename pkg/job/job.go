@@ -10,6 +10,7 @@ import (
 	"sync"
 
 	"github.com/google/uuid"
+	v1 "github.com/turao/go-worker/api/v1"
 )
 
 type job struct {
@@ -60,24 +61,8 @@ func New(name string, args ...string) *job {
 	}
 }
 
-func (j *job) ID() string {
-	return j.id
-}
-
-func (j *job) Status() string {
-	return string(j.state.Status())
-}
-
-func (j *job) ExitCode() int {
-	return j.state.ExitCode()
-}
-
-func (j *job) Output() string {
-	return j.logs.Output()
-}
-
-func (j *job) Errors() string {
-	return j.logs.Errors()
+func (j *job) ID() v1.JobID {
+	return v1.JobID(j.id)
 }
 
 func (j *job) Start() error {
@@ -137,6 +122,16 @@ func (j *job) Stop() error {
 	}
 
 	return nil
+}
+
+func (j *job) Info() *v1.JobInfo {
+	return &v1.JobInfo{
+		ID:       v1.JobID(j.id),
+		Status:   string(j.state.Status()),
+		ExitCode: j.state.ExitCode(),
+		Output:   j.logs.Output(),
+		Errors:   j.logs.Errors(),
+	}
 }
 
 func (j *job) waitUntilCompleted() error {

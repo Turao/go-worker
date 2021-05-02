@@ -6,24 +6,20 @@ type DispatchRequest struct {
 }
 
 type DispatchResponse struct {
-	ID string `json:"id"`
+	ID JobID `json:"id"`
 }
 
 type StopRequest struct {
-	ID string `json:"id"`
+	ID JobID `json:"id"`
 }
 
 type StopResponse struct {
 }
 
 type QueryInfoRequest struct {
-	ID string `json:"id"`
+	ID JobID `json:"id"`
 }
 
 type QueryInfoResponse struct {
-	ID       string `json:"id"`
-	Status   string `json:"status"`
-	ExitCode int    `json:"exitCode"`
-	Output   string `json:"output"`
-	Errors   string `json:"errors"`
+	JobInfo // embbeded
 }

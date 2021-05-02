@@ -69,7 +69,7 @@ func decodeStopRequest(_ context.Context, r *http.Request) (interface{}, error) 
 	}
 
 	return v1.StopRequest{
-		ID: jobID,
+		ID: v1.JobID(jobID),
 	}, nil
 }
 
@@ -81,7 +81,7 @@ func decodeQueryInfoRequest(_ context.Context, r *http.Request) (interface{}, er
 	}
 
 	return v1.QueryInfoRequest{
-		ID: jobID,
+		ID: v1.JobID(jobID),
 	}, nil
 }
 

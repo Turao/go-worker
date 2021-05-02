@@ -51,7 +51,7 @@ func (c *client) Stop(jobID string) (interface{}, error) {
 	defer cancel()
 
 	request := v1.StopRequest{
-		ID: jobID,
+		ID: v1.JobID(jobID),
 	}
 
 	res, err := c.stop(ctx, request)
@@ -67,7 +67,7 @@ func (c *client) Query(jobID string) (interface{}, error) {
 	defer cancel()
 
 	request := v1.QueryInfoRequest{
-		ID: jobID,
+		ID: v1.JobID(jobID),
 	}
 
 	res, err := c.query(ctx, request)

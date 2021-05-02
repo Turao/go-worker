@@ -3,6 +3,7 @@ package worker
 import (
 	"log"
 
+	v1 "github.com/turao/go-worker/api/v1"
 	"github.com/turao/go-worker/pkg/job"
 	"github.com/turao/go-worker/pkg/storage"
 )
@@ -14,13 +15,10 @@ type Storage interface {
 }
 
 type Job interface {
-	ID() string
+	ID() v1.JobID
 	Start() error
 	Stop() error
-	Status() string
-	ExitCode() int
-	Output() string
-	Errors() string
+	Info() *v1.JobInfo
 }
 
 type Worker struct {
@@ -31,11 +29,11 @@ func NewWorker() *Worker {
 	return &Worker{store: storage.New()}
 }
 
-func (w *Worker) Dispatch(name string, args ...string) (string, error) {
+func (w *Worker) Dispatch(name string, args ...string) (v1.JobID, error) {
 	log.Println("dispatching new job for command:", name, args)
 
 	job := job.New(name, args...)
-	err := w.store.Put(job.ID(), job)
+	err := w.store.Put(string(job.ID()), job)
 	if err != nil {
 		log.Println("unable to store command", err.Error())
 		return "", err
@@ -50,8 +48,8 @@ func (w *Worker) Dispatch(name string, args ...string) (string, error) {
 	return job.ID(), nil
 }
 
-func (w *Worker) Stop(jobID string) error {
-	item, err := w.store.Get(jobID)
+func (w *Worker) Stop(jobID v1.JobID) error {
+	item, err := w.store.Get(string(jobID))
 	if err != nil {
 		log.Println("unable to retrieve job", jobID, err.Error())
 		return err
@@ -67,27 +65,13 @@ func (w *Worker) Stop(jobID string) error {
 	return nil
 }
 
-type JobInfo struct {
-	ID       string `json:"id"`
-	Status   string `json:"status"`
-	ExitCode int    `json:"exitCode"`
-	Output   string `json:"output"`
-	Errors   string `json:"errors"`
-}
-
-func (w *Worker) QueryInfo(jobID string) (*JobInfo, error) {
-	item, err := w.store.Get(jobID)
+func (w *Worker) QueryInfo(jobID v1.JobID) (*v1.JobInfo, error) {
+	item, err := w.store.Get(string(jobID))
 	if err != nil {
 		return nil, err
 	}
 
 	job := item.(Job) // need casting as we don't have generics yet...
 
-	return &JobInfo{
-		ID:       job.ID(),
-		Status:   job.Status(),
-		ExitCode: job.ExitCode(),
-		Output:   job.Output(),
-		Errors:   job.Errors(),
-	}, nil
+	return job.Info(), nil
 }
