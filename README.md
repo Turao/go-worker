@@ -1,17 +1,14 @@
 # go-worker
 
-## Features
-### Dispatch a new Job
-Allows users to create and execute processes.
+### Features
+**Dispatch Job**
+Endpoint: `POST /job`
+```yaml
+# Allows users to create and execute a unix process.
+  # This is a not a blocking operation 
+  # (i.e. does not wait for the process to start).
 
-:memo: This is a not a blocking operation (i.e. does not wait for the process to start).
-
-```
-POST /job
-```
-
-Receives:
-```json
+# Receives:
 {
   "name": "<your-command-here>",
   "args": [
@@ -20,38 +17,31 @@ Receives:
     "<...>"
   ]
 }
-```
 
-Returns:
-```json
+# Returns:
 {
   "id": "<uuid>"
 }
 ```
 
-### Forcefully Stop a Job
-Allows users to stop a running job.
+**Stop Job**
+Endpoint: `POST /job/{id}/stop`
+```yaml
+# Allows users to stop a running job.
+  # This is a not a blocking operation 
+  # (i.e. does not wait for the process to stop).
 
-:memo: This is a not a blocking operation (i.e. does not wait for the process to stop).
-
-```
-POST /job/{id}/stop
-```
-
-Returns:
+# Returns:
 - `HTTP Status 200 (Sucessful)`
 - `HTTP Status 404 (Not Found)`
 - `HTTP Status 500 (Internal Error)`
-
-### Query Job Info
-Displays information about an existing job.
-
-```
-GET /job/{id}/info
 ```
 
-Returns:
-```json
+**Query Job Info:**
+Endpoint: `GET /job/{id}/info`
+```yaml
+# Displays information about an existing job.
+# Returns:
 {
   "id": "<uuid>",
   "status": "<status>",
@@ -63,14 +53,17 @@ Returns:
 
 ### Architecture
 
-> I'm not really sure how to best structure the client layers yet...
+![architecture](docs/architecture.drawio.svg)
 
+### Folder Structure
+```
 - api/
   - v1/
-    - worker.go: worker endpoints (client/server) API
+    - worker.go: worker DTOs
+    - job.go: job DTOs
 - cmd/
   - client
-    - main.go: decorates a client with a nice CLI interface
+    - main.go: decorates a client with a CLI interface
   - server
     - main.go: decorates a server (no CLI interface for now...)
 - pkg/
@@ -81,8 +74,8 @@ Returns:
   - server
     - server.go: decorates an `http.server` with routing (should I move routing to transport?)
     - transport.go: decodes http requests, encodes http responses
-    - endpoint.go: implements an anti-fragile layer, independent of transport (just like a controller)
-    - logging.go: decorates services with custom logging (what is being called and when)
+    - endpoint.go: implements an anti-fragile layer, independent of transport (somewhat like a controller)
+    - logging.go: decorates services with custom logging (what is being called and when (I'm just playing with the middleware pattern here)
     - service.go: provides application-level features
   - worker
     - worker.go: manages jobs
@@ -90,3 +83,4 @@ Returns:
     - job.go: manages a unix process
   - storage
     - store.go: in-memory repository
+```
